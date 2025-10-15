@@ -3,12 +3,19 @@
 #include <fstream>
 
 using namespace std;
+
+int classCount = 0;
 %}
 
 %option noyywrap
+%option yylineno
 
 %%
-.|\n	ECHO;
+event|situation|pry|mixin|phaseMixin|roleMixin|historicalRoleMixin|kind|collective|quantity|quality|mode|intrisicMode|extrinsicMode|subkind|phase|role|historicalRole {
+	cout << YYText() << " on line " << lineno() << endl;
+	classCount++;
+};
+.|\n	;
 %%
 
 int main(int argc, char **argv)
@@ -30,7 +37,7 @@ int main(int argc, char **argv)
 		}
 	}
 	
-
 	lexer.yylex();
+	cout << classCount << " Estereótipos de classe encontrados" << endl;
 	fin.close();
 }
