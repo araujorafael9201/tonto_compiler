@@ -1,6 +1,7 @@
 %{
 #include <iostream>
 #include <fstream>
+#include "tokens.h"
 
 using namespace std;
 
