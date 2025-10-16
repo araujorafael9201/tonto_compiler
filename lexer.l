@@ -25,6 +25,8 @@ number {digit}+(\.{digit}+)?
 downcase_letter [a-z]
 uppercase_letter [A-Z]
 letter {downcase_letter}|{uppercase_letter}
+class {uppercase_letter}({letter}|"_")*
+relationship {downcase_letter}({letter}|"_")*
 %%
   // Regras de tradução
 {whitespaces}                 { currentColumn += YYLeng(); }
@@ -112,6 +114,18 @@ functional-complexes          {
                                 relationshipCount++;
                                 currentColumn += YYLeng();
                                 // return RELATIONSHIP_ESTEREOTYPE;
+                              }
+{class}                       {
+                                cout << "CLASSE | ";
+                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                currentColumn += YYLeng();
+                                // return CLASS_ID
+                              }
+{relationship}                {
+                                  cout << "RELAÇÃO | ";
+                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                currentColumn += YYLeng();
+                                // return RELATIONSHIP_ID
                               }
 .	                            { 
                                 cout << "ERRO | Lexema não identificado. | line: " << lineno() << "| column: " << currentColumn << endl;
