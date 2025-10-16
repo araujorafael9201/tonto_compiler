@@ -7,7 +7,7 @@
 using namespace std;
 
 unsigned long keywordCount = 0, nativeDataTypeCount = 0, classCount = 0, relationshipCount = 0, specialSymbolCount = 0,
-              metaAttrCount = 0;
+              metaAttrCount = 0, instanceCount = 0;
 unsigned currentColumn = 1;
 %}
 
@@ -231,6 +231,7 @@ functional-complexes          {
 {instance}                    {
                                 cout << "INSTÂNCIA | ";
                                 cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                instanceCount++;
                                 currentColumn += YYLeng();
                                 // return INSTANCE_ID
                               }
@@ -261,8 +262,9 @@ int main(int argc, char **argv)
 	
 	lexer.yylex();
   cout << keywordCount << " Palavras reservadas encontradas" << endl;
-  cout << nativeDataTypeCount << " Tipos de dados nativos encontradss" << endl;
+  cout << nativeDataTypeCount << " Tipos de dados nativos encontrados" << endl;
   cout << metaAttrCount << " Meta-Atributos encontrados" << endl;
+  cout << instanceCount << " Instâncias encontradas" << endl;
 	cout << classCount << " Estereótipos de classe encontrados" << endl;
   cout << relationshipCount << " Estereótipos de relação encontrados" << endl;
   cout << specialSymbolCount << " Símbolos especiais encontrados" << endl;
