@@ -27,7 +27,7 @@ uppercase_letter [A-Z]
 letter {downcase_letter}|{uppercase_letter}
 class {uppercase_letter}({letter}|"_")*
 relationship {downcase_letter}({letter}|"_")*
-instance ({letter}|"_")+{digit}+
+instance {letter}({letter}|"_")*{digit}+
 %%
   // Regras de tradução
 {whitespaces}                 { currentColumn += YYLeng(); }
