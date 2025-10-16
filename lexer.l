@@ -6,7 +6,8 @@
 
 using namespace std;
 
-unsigned long keywordCount = 0, nativeDataTypeCount = 0, classCount = 0, relationshipCount = 0, specialSymbolCount = 0;
+unsigned long keywordCount = 0, nativeDataTypeCount = 0, classCount = 0, relationshipCount = 0, specialSymbolCount = 0,
+              metaAttrCount = 0;
 unsigned currentColumn = 1;
 %}
 
@@ -20,6 +21,7 @@ whitespaces {delim}+
 class_estereotype  event|situation|pry|mixin|phaseMixin|roleMixin|historicalRoleMixin|kind|collective|quantity|quality|mode|intrisicMode|extrinsicMode|subkind|phase|role|historicalRole     
 relationship_estereotype material|derivation|comparative|mediation|characterization|externalDependence|componentOf|memberOf|subCollectionOf|subQualityOf|instantiation|termination|participational|participation|historicalDependence|creation|manifestation|bringsAbout|triggers|composition|aggregation|inherence|value|formal|constitution
 native_data_type number|string|boolean|date|time|datetime
+meta_attr ordered|const|derived|subsets|redefines
 digit [0-9]
 number {digit}+(\.{digit}+)?
 downcase_letter [a-z]
@@ -200,6 +202,13 @@ functional-complexes          {
                                 currentColumn += YYLeng();
                                 // return RELATIONSHIP_ESTEREOTYPE;
                               }
+{meta_attr}    {
+                                cout << "META-ATRIBUTO | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                metaAttrCount++;
+                                currentColumn += YYLeng();
+                                // return META_ATTR;
+                              }
 {class}                       {
                                 cout << "CLASSE | ";
                                 cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
@@ -246,6 +255,7 @@ int main(int argc, char **argv)
 	lexer.yylex();
   cout << keywordCount << " Palavras reservadas encontradas" << endl;
   cout << nativeDataTypeCount << " Tipos de dados nativos encontradss" << endl;
+  cout << metaAttrCount << " Meta-Atributos encontrados" << endl;
 	cout << classCount << " Estereótipos de classe encontrados" << endl;
   cout << relationshipCount << " Estereótipos de relação encontrados" << endl;
   cout << specialSymbolCount << " Símbolos especiais encontrados" << endl;
