@@ -27,6 +27,7 @@ uppercase_letter [A-Z]
 letter {downcase_letter}|{uppercase_letter}
 class {uppercase_letter}({letter}|"_")*
 relationship {downcase_letter}({letter}|"_")*
+instance ({letter}|"_")+{digit}+
 %%
   // Regras de tradução
 {whitespaces}                 { currentColumn += YYLeng(); }
@@ -210,6 +211,12 @@ functional-complexes          {
                                 cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 currentColumn += YYLeng();
                                 // return RELATIONSHIP_ID
+                              }
+{instance}                    {
+                                cout << "INSTÂNCIA | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                currentColumn += YYLeng();
+                                // return INSTANCE_ID
                               }
 .	                            { 
                                 cout << "ERRO | Lexema não identificado. | line: " << lineno() << " | column: " << currentColumn << endl;
