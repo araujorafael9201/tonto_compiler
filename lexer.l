@@ -6,7 +6,8 @@
 
 using namespace std;
 
-unsigned long keywordCount = 0, nativeDataTypeCount = 0, classCount = 0, relationshipCount = 0, specialSymbolCount = 0;
+unsigned long keywordCount = 0, nativeDataTypeCount = 0, classCount = 0, relationshipCount = 0, specialSymbolCount = 0,
+              metaAttrCount = 0, instanceCount = 0;
 unsigned currentColumn = 1;
 %}
 
@@ -20,11 +21,13 @@ whitespaces {delim}+
 class_estereotype  event|situation|pry|mixin|phaseMixin|roleMixin|historicalRoleMixin|kind|collective|quantity|quality|mode|intrisicMode|extrinsicMode|subkind|phase|role|historicalRole     
 relationship_estereotype material|derivation|comparative|mediation|characterization|externalDependence|componentOf|memberOf|subCollectionOf|subQualityOf|instantiation|termination|participational|participation|historicalDependence|creation|manifestation|bringsAbout|triggers|composition|aggregation|inherence|value|formal|constitution
 native_data_type number|string|boolean|date|time|datetime
+meta_attr ordered|const|derived|subsets|redefines
 digit [0-9]
 number {digit}+(\.{digit}+)?
 downcase_letter [a-z]
 uppercase_letter [A-Z]
 letter {downcase_letter}|{uppercase_letter}
+new_data_type {letter}+DataType
 class {uppercase_letter}({letter}|"_")*
 relationship {downcase_letter}({letter}|"_")*
 instance {letter}({letter}|"_")*{digit}+
@@ -200,6 +203,19 @@ functional-complexes          {
                                 currentColumn += YYLeng();
                                 // return RELATIONSHIP_ESTEREOTYPE;
                               }
+{meta_attr}                   {
+                                cout << "META-ATRIBUTO | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                metaAttrCount++;
+                                currentColumn += YYLeng();
+                                // return META_ATTR;
+                              }
+{new_data_type}               {
+                                cout << "NOVO TIPO | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                currentColumn += YYLeng();
+                                // return NEW_DATA_TYPE
+                              }
 {class}                       {
                                 cout << "CLASSE | ";
                                 cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
@@ -215,6 +231,7 @@ functional-complexes          {
 {instance}                    {
                                 cout << "INSTÂNCIA | ";
                                 cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                instanceCount++;
                                 currentColumn += YYLeng();
                                 // return INSTANCE_ID
                               }
@@ -245,7 +262,9 @@ int main(int argc, char **argv)
 	
 	lexer.yylex();
   cout << keywordCount << " Palavras reservadas encontradas" << endl;
-  cout << nativeDataTypeCount << " Tipos de dados nativos encontradss" << endl;
+  cout << nativeDataTypeCount << " Tipos de dados nativos encontrados" << endl;
+  cout << metaAttrCount << " Meta-Atributos encontrados" << endl;
+  cout << instanceCount << " Instâncias encontradas" << endl;
 	cout << classCount << " Estereótipos de classe encontrados" << endl;
   cout << relationshipCount << " Estereótipos de relação encontrados" << endl;
   cout << specialSymbolCount << " Símbolos especiais encontrados" << endl;
