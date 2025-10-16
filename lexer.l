@@ -27,6 +27,7 @@ number {digit}+(\.{digit}+)?
 downcase_letter [a-z]
 uppercase_letter [A-Z]
 letter {downcase_letter}|{uppercase_letter}
+new_data_type {letter}+DataType
 class {uppercase_letter}({letter}|"_")*
 relationship {downcase_letter}({letter}|"_")*
 instance {letter}({letter}|"_")*{digit}+
@@ -202,12 +203,18 @@ functional-complexes          {
                                 currentColumn += YYLeng();
                                 // return RELATIONSHIP_ESTEREOTYPE;
                               }
-{meta_attr}    {
+{meta_attr}                   {
                                 cout << "META-ATRIBUTO | ";
                                 cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 metaAttrCount++;
                                 currentColumn += YYLeng();
                                 // return META_ATTR;
+                              }
+{new_data_type}               {
+                                cout << "NOVO TIPO | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                currentColumn += YYLeng();
+                                // return NEW_DATA_TYPE
                               }
 {class}                       {
                                 cout << "CLASSE | ";
