@@ -33,63 +33,63 @@ relationship {downcase_letter}({letter}|"_")*
 \n                            { currentColumn = 1; }
 genset                        {
                                 cout << "PALAVRA RESERVADA | ";
-                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 keywordCount++;
                                 currentColumn += YYLeng();
                                 // return GENSET;
                               }
 disjoint                      {
                                 cout << "PALAVRA RESERVADA | ";
-                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 keywordCount++;
                                 currentColumn += YYLeng();
                                 // return DISJOINT;
                               }
 complete                      {
                                 cout << "PALAVRA RESERVADA | ";
-                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 keywordCount++;
                                 currentColumn += YYLeng();
                                 // return COMPLETE;
                               }
 general                       {
                                 cout << "PALAVRA RESERVADA | ";
-                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 keywordCount++;
                                 currentColumn += YYLeng();
                                 // return GENERAL;
                               }
 specifics                     {
                                 cout << "PALAVRA RESERVADA | ";
-                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 keywordCount++;
                                 currentColumn += YYLeng();
                                 // return SPECIFICS;
                               }
 where                         {
                                 cout << "PALAVRA RESERVADA | ";
-                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 keywordCount++;
                                 currentColumn += YYLeng();
                                 // return WHERE;
                               }
 package                       {
                                 cout << "PALAVRA RESERVADA | ";
-                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 keywordCount++;
                                 currentColumn += YYLeng();
                                 // return PACKAGE;
                               }
 import                        {
                                 cout << "PALAVRA RESERVADA | ";
-                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 keywordCount++;
                                 currentColumn += YYLeng();
                                 // return IMPORT;
                               }
 functional-complexes          {
                                 cout << "PALAVRA RESERVADA | ";
-                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 keywordCount++;
                                 currentColumn += YYLeng();
                                 // return FUNCTIONAL_COMPLEXES;
@@ -180,39 +180,39 @@ functional-complexes          {
                               }
 {native_data_type}            {
                                 cout << "TIPO DE DADO NATIVO | ";
-                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 nativeDataTypeCount++;
                                 currentColumn += YYLeng();
                                 // return NATIVE_DATA_TYPE;
                               }
 {class_estereotype}           {
                                 cout << "ESTEREÓTIPO DE CLASSE | ";
-                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 classCount++;
                                 currentColumn += YYLeng();
                                 // return CLASS_ESTEREOTYPE;
                               }
 {relationship_estereotype}    {
                                 cout << "ESTERIÓTIPO DE RELAÇÃO | ";
-                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 relationshipCount++;
                                 currentColumn += YYLeng();
                                 // return RELATIONSHIP_ESTEREOTYPE;
                               }
 {class}                       {
                                 cout << "CLASSE | ";
-                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 currentColumn += YYLeng();
                                 // return CLASS_ID
                               }
 {relationship}                {
-                                  cout << "RELAÇÃO | ";
-                                cout << YYText() << " | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << "RELAÇÃO | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 currentColumn += YYLeng();
                                 // return RELATIONSHIP_ID
                               }
 .	                            { 
-                                cout << "ERRO | Lexema não identificado. | line: " << lineno() << "| column: " << currentColumn << endl;
+                                cout << "ERRO | Lexema não identificado. | line: " << lineno() << " | column: " << currentColumn << endl;
                                 currentColumn += YYLeng(); 
                               }
 %%
@@ -241,5 +241,6 @@ int main(int argc, char **argv)
   cout << nativeDataTypeCount << " Tipos de dados nativos encontradss" << endl;
 	cout << classCount << " Estereótipos de classe encontrados" << endl;
   cout << relationshipCount << " Estereótipos de relação encontrados" << endl;
+  cout << specialSymbolCount << " Símbolos especiais encontrados" << endl;
 	fin.close();
 }
