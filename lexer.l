@@ -6,7 +6,7 @@
 
 using namespace std;
 
-unsigned long keywordCount = 0, nativeDataTypeCount = 0, classCount = 0, relationshipCount = 0;
+unsigned long keywordCount = 0, nativeDataTypeCount = 0, classCount = 0, relationshipCount = 0, specialSymbolCount = 0;
 unsigned currentColumn = 1;
 %}
 
@@ -93,6 +93,90 @@ functional-complexes          {
                                 keywordCount++;
                                 currentColumn += YYLeng();
                                 // return FUNCTIONAL_COMPLEXES;
+                              }
+\{                            {
+                                cout << "SÍMBOLO ESPECIAL | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                specialSymbolCount++;
+                                currentColumn += YYLeng();
+                                // return L_BRACE;
+                              }
+\}                            {
+                                cout << "SÍMBOLO ESPECIAL | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                specialSymbolCount++;
+                                currentColumn += YYLeng();
+                                // return R_BRACE;
+                              }
+\(                            {
+                                cout << "SÍMBOLO ESPECIAL | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                specialSymbolCount++;
+                                currentColumn += YYLeng();
+                                // return L_PARAM;
+                              }
+\)                            {
+                                cout << "SÍMBOLO ESPECIAL | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                specialSymbolCount++;
+                                currentColumn += YYLeng();
+                                // return R_PARAM;
+                              }
+\[                            {
+                                cout << "SÍMBOLO ESPECIAL | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                specialSymbolCount++;
+                                currentColumn += YYLeng();
+                                // return L_BRACKET;
+                              }
+\]                            {
+                                cout << "SÍMBOLO ESPECIAL | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                specialSymbolCount++;
+                                currentColumn += YYLeng();
+                                // return R_BRACKET;
+                              }
+\.\.                          {
+                                cout << "SÍMBOLO ESPECIAL | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                specialSymbolCount++;
+                                currentColumn += YYLeng();
+                                // return TP;
+                              }
+\<\>\-\-                      {
+                                cout << "SÍMBOLO ESPECIAL | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                specialSymbolCount++;
+                                currentColumn += YYLeng();
+                                // return LRO;
+                              }
+\-\-\<\>                      {
+                                cout << "SÍMBOLO ESPECIAL | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                specialSymbolCount++;
+                                currentColumn += YYLeng();
+                                // return RRO;
+                              }
+\*                            {
+                                cout << "SÍMBOLO ESPECIAL | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                specialSymbolCount++;
+                                currentColumn += YYLeng();
+                                // return ASTERISK;
+                              }
+\@                            {
+                                cout << "SÍMBOLO ESPECIAL | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                specialSymbolCount++;
+                                currentColumn += YYLeng();
+                                // return AT;
+                              }
+\:                            {
+                                cout << "SÍMBOLO ESPECIAL | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                specialSymbolCount++;
+                                currentColumn += YYLeng();
+                                // return COLON;
                               }
 {native_data_type}            {
                                 cout << "TIPO DE DADO NATIVO | ";
