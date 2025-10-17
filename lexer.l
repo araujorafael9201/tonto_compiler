@@ -8,9 +8,12 @@
 using namespace std;
 
 ofstream outputAnalyticData;
+ofstream outputSyntheticData;
 
-unsigned long keywordCount = 0, nativeDataTypeCount = 0, classCount = 0, relationshipCount = 0, specialSymbolCount = 0,
-              metaAttrCount = 0, instanceCount = 0;
+unsigned long keywordCount = 0, nativeDataTypeCount = 0, metaAttrCount = 0, specialSymbolCount = 0,
+              classEsterotypeCount = 0, relationshipEstereotypeCount = 0,
+              classIdCount = 0, relationshipIdCount = 0, instanceIdCount = 0, newDataTypeIdCount = 0,
+              numericConstantCount = 0;
 int currentColumn = 1;
 
 void logAnalyticData(int token, const string& type, const char* lexeme, int line, int column);
@@ -212,6 +215,7 @@ functional-complexes          {
                                 cout << "CONSTANTE NUMÉRICA | ";
                                 cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 logAnalyticData(NUM, "Constante Numérica", YYText(), lineno(), currentColumn);
+                                numericConstantCount++;
                                 currentColumn += YYLeng();
                                 // return NUM;
                               }                    
@@ -227,7 +231,7 @@ functional-complexes          {
                                 cout << "ESTEREÓTIPO DE CLASSE | ";
                                 cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 logAnalyticData(CLASS_ESTEREOTYPE, "Esteriótipo de classe", YYText(), lineno(), currentColumn);
-                                classCount++;
+                                classEsterotypeCount++;
                                 currentColumn += YYLeng();
                                 // return CLASS_ESTEREOTYPE;
                               }
@@ -235,7 +239,7 @@ functional-complexes          {
                                 cout << "ESTERIÓTIPO DE RELAÇÃO | ";
                                 cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 logAnalyticData(RELATIONSHIP_ESTEREOTYPE, "Esteriótipo de relação", YYText(), lineno(), currentColumn);
-                                relationshipCount++;
+                                relationshipEstereotypeCount++;
                                 currentColumn += YYLeng();
                                 // return RELATIONSHIP_ESTEREOTYPE;
                               }
@@ -251,6 +255,7 @@ functional-complexes          {
                                 cout << "NOVO TIPO | ";
                                 cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 logAnalyticData(NEW_DATA_TYPE, "Novo tipo de dado", YYText(), lineno(), currentColumn);
+                                newDataTypeIdCount++;
                                 currentColumn += YYLeng();
                                 // return NEW_DATA_TYPE
                               }
@@ -258,6 +263,7 @@ functional-complexes          {
                                 cout << "CLASSE | ";
                                 cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 logAnalyticData(CLASS_ID, "Identificador de classe", YYText(), lineno(), currentColumn);
+                                classIdCount++;
                                 currentColumn += YYLeng();
                                 // return CLASS_ID
                               }
@@ -265,6 +271,7 @@ functional-complexes          {
                                 cout << "RELAÇÃO | ";
                                 cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 logAnalyticData(RELATIONSHIP_ID, "Identificador de relação", YYText(), lineno(), currentColumn);
+                                relationshipIdCount++;
                                 currentColumn += YYLeng();
                                 // return RELATIONSHIP_ID
                               }
@@ -272,7 +279,7 @@ functional-complexes          {
                                 cout << "INSTÂNCIA | ";
                                 cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
                                 logAnalyticData(INSTANCE_ID, "Identificador de instância", YYText(), lineno(), currentColumn);
-                                instanceCount++;
+                                instanceIdCount++;
                                 currentColumn += YYLeng();
                                 // return INSTANCE_ID
                               }
@@ -289,6 +296,12 @@ int main(int argc, char **argv)
 
   outputAnalyticData.open("analyticData.log");
   if (!outputAnalyticData.is_open()) {
+      cout << "Erro: Não foi possível criar o arquivo de dados analíticos." << endl;
+      return EXIT_FAILURE;
+  }
+
+  outputSyntheticData.open("syntheticData.log");
+  if (!outputSyntheticData.is_open()) {
       cout << "Erro: Não foi possível criar o arquivo de dados analíticos." << endl;
       return EXIT_FAILURE;
   }
@@ -311,13 +324,26 @@ int main(int argc, char **argv)
   cout << keywordCount << " Palavras reservadas encontradas" << endl;
   cout << nativeDataTypeCount << " Tipos de dados nativos encontrados" << endl;
   cout << metaAttrCount << " Meta-Atributos encontrados" << endl;
-  cout << instanceCount << " Instâncias encontradas" << endl;
-	cout << classCount << " Estereótipos de classe encontrados" << endl;
-  cout << relationshipCount << " Estereótipos de relação encontrados" << endl;
+  cout << instanceIdCount << " Instâncias encontradas" << endl;
+	cout << classEsterotypeCount << " Estereótipos de classe encontrados" << endl;
+  cout << relationshipEstereotypeCount << " Estereótipos de relação encontrados" << endl;
   cout << specialSymbolCount << " Símbolos especiais encontrados" << endl;
+
+  outputSyntheticData << "Palavras Reservadas: " << keywordCount << '\n'
+                      << "Tipos de dados nativos: " << nativeDataTypeCount << '\n'
+                      << "Meta-atributos: " << metaAttrCount << '\n'
+                      << "Símbolos especiais: " << specialSymbolCount << '\n'
+                      << "Estereótipos de classe: " << classEsterotypeCount << '\n'
+                      << "Estereótipos de relação: " << relationshipEstereotypeCount << '\n'
+                      << "Identificadores de classe: " << classIdCount << '\n'
+                      << "Identificadores de relação: " << relationshipIdCount << '\n'
+                      << "Identificadores de instância: " << instanceIdCount << '\n'
+                      << "Identificadores de novo tipo de dado: " << newDataTypeIdCount << '\n'
+                      <<  "Constantes numéricas: " << numericConstantCount << '\n';
 
 	fin.close();
   outputAnalyticData.close();
+  outputSyntheticData.close();
 
   return 0;
 }
