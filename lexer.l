@@ -182,6 +182,12 @@ functional-complexes          {
                                 currentColumn += YYLeng();
                                 // return COLON;
                               }
+{number}                      {
+                                cout << "CONSTANTE NUMÉRICA | ";
+                                cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
+                                currentColumn += YYLeng();
+                                // return NUM;
+                              }                    
 {native_data_type}            {
                                 cout << "TIPO DE DADO NATIVO | ";
                                 cout << YYText() << " | line: " << lineno() << " | column: " << currentColumn << endl;
