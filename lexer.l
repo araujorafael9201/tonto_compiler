@@ -302,7 +302,7 @@ int main(int argc, char **argv)
 
   outputSyntheticData.open("syntheticData.log");
   if (!outputSyntheticData.is_open()) {
-      cout << "Erro: Não foi possível criar o arquivo de dados analíticos." << endl;
+      cout << "Erro: Não foi possível criar o arquivo de dados de síntese." << endl;
       return EXIT_FAILURE;
   }
 
@@ -339,7 +339,7 @@ int main(int argc, char **argv)
                       << "Identificadores de relação: " << relationshipIdCount << '\n'
                       << "Identificadores de instância: " << instanceIdCount << '\n'
                       << "Identificadores de novo tipo de dado: " << newDataTypeIdCount << '\n'
-                      <<  "Constantes numéricas: " << numericConstantCount << '\n';
+                      << "Constantes numéricas: " << numericConstantCount << '\n';
 
 	fin.close();
   outputAnalyticData.close();
