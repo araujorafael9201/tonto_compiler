@@ -242,8 +242,8 @@ functional-complexes          {
                                 // return INSTANCE_ID
                               }
 .	                            { 
-                                cout << "ERRO | Lexema não identificado. | line: " << lineno() << " | column: " << currentColumn << endl;
-                                currentColumn += YYLeng(); 
+                                cerr << "ERRO LÉXICO: Lexema \"" << YYText() << "\" inválido. | line: " << lineno() << " | column: " << currentColumn << endl;
+                                exit(1);
                               }
 %%
 
