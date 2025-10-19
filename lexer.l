@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 #include "tokens.h"
 
 using namespace std;
@@ -17,6 +18,7 @@ unsigned long keywordCount = 0, nativeDataTypeCount = 0, metaAttrCount = 0, spec
 int currentColumn = 1;
 
 void logAnalyticData(int token, const string& type, const char* lexeme, int line, int column);
+void logLexicalError(const char* lexeme, int line, int column);
 %}
 
  // Opções do Flex
@@ -224,7 +226,8 @@ functional-complexes          {
                                 // return INSTANCE_ID
                               }
 .	                            { 
-                                cerr << "ERRO LÉXICO: Lexema \"" << YYText() << "\" inválido. | line: " << lineno() << " | column: " << currentColumn << endl;
+                                logLexicalError(YYText(), lineno(), currentColumn);
+                                currentColumn += YYLeng();
                               }
 %%
 
@@ -285,6 +288,23 @@ int main(int argc, char **argv)
 void logAnalyticData(int token, const string& type, const char* lexeme, int line, int column)
 {
   if(outputAnalyticData.is_open()){
-    outputAnalyticData << "token: " << token << " | lexeme: " << lexeme << " | type: " << type << " | line: " << line << " | column: " << column << endl;
+    outputAnalyticData << "token: " << token 
+                      << " | lexeme: " << lexeme 
+                      << " | type: " << type 
+                      << " | line: " << line 
+                      << " | column: " << column << '\n';
   }
 }
+
+void logLexicalError(const char* lexeme, int line, int column)
+{
+  stringstream errorMessage;
+  errorMessage << "ERRO LÉXICO: Lexema \"" << lexeme << "\" inválido. | line: " << line << " | column: " << column << '\n';
+
+  cerr << errorMessage.str();
+
+  if (outputAnalyticData.is_open()) {
+    outputAnalyticData << errorMessage.str();
+  }
+}
+
