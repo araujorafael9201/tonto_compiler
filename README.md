@@ -55,14 +55,26 @@ tonto_compiler/
 
 Install dependencies:
 ```bash
-# Ubuntu/Debian
-sudo apt-get install flex cmake build-essential
+# Ubuntu/Debian/Mint
+sudo apt-get install flex libfl-dev cmake build-essential
 
 # Fedora/RHEL
 sudo dnf install flex cmake gcc-c++
 
 # macOS
 brew install flex cmake
+```
+
+Clone the repository:
+```bash
+# Using HTTPS
+git clone https://github.com/araujorafael9201/tonto_compiler.git
+
+# Or using SSH
+git clone git@github.com:araujorafael9201/tonto_compiler.git
+
+# Navigate to directory
+cd tonto_compiler
 ```
 
 Build the project:
@@ -80,26 +92,34 @@ make
 
 ## ▶️ Running the Lexical Analyzer
 
-After building, run the analyzer on a `.tonto` file:
+After building and add a `.tonto` file on project root, run the analyzer:
 
 ```bash
 # From the Build directory
-./tonto ../TestExamples/Car.tonto
+./tonto ../Car.tonto
 
 # Or from project root
-./Build/tonto TestExamples/Car.tonto
+./Build/tonto Car.tonto
 ```
 
 ### Example Output
 
-The analyzer prints each recognized token with its type, lexeme, line number, and column:
+The analyzer generates two output files on Build directory:
+- **analyticData.log**: Detailed token-by-token analysis
+- **syntheticData.log**: Summary statistics
 
 ```
+# analyticData.log
+
 PALAVRA RESERVADA | package | line: 1 | column: 1
 CLASSE | CarOwnership | line: 1 | column: 9
 PALAVRA RESERVADA | kind | line: 3 | column: 1
 CLASSE | Organization | line: 3 | column: 6
+
 ...
+
+# syntheticData.log
+
 9 Palavras reservadas encontradas
 3 Tipos de dados nativos encontrados
 2 Meta-Atributos encontrados
@@ -108,9 +128,18 @@ CLASSE | Organization | line: 3 | column: 6
 15 Símbolos especiais encontrados
 ```
 
-The analyzer also generates two output files:
-- **Analytical data**: Detailed token-by-token analysis
-- **Synthetic data**: Summary statistics
+### ⚠️ Error Handling
+
+When lexical errors are detected (for example, invalid symbols or malformed tokens), the analyzer reports them in two ways:
+
+* **Terminal Output**: An error message is immediately printed to the console, indicating the line and column where the error occurred.
+* **`analyticData.log` File**: The same error message is also recorded in the analytical log file for later review.
+
+Example:
+
+```
+ERRO LÉXICO: Lexema "," inválido. | line: 1 | column: 5
+```
 
 ## 📝 Token Categories
 
