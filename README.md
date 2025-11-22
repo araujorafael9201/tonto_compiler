@@ -17,7 +17,7 @@ A lexical analyzer (scanner) for the **Tonto** language, developed as a college 
 - **Native Data Types**: `number`, `string`, `boolean`, `date`, `time`, `datetime`
 - **Meta-Attributes**: `ordered`, `const`, `derived`, `subsets`, `redefines`
 - **Special Symbols**: `{`, `}`, `(`, `)`, `[`, `]`, `..`, `<>--`, `--<>`, `*`, `@`, `:`
-- **Identifiers**: Classes, relationships, instances, and custom data types
+- **Identifiers**: Classes, relations, instances, and custom data types
 
 ## 🚀 Current Status
 
@@ -150,7 +150,7 @@ Control structures and declarations: `genset`, `disjoint`, `complete`, `general`
 OntoUML/UFO entity types: `kind`, `subkind`, `phase`, `role`, `mixin`, `collective`, `quantity`, `quality`, `mode`, `event`, `situation`, etc.
 
 ### 3. Relationship Stereotypes (24 tokens)
-OntoUML/UFO relationship types: `material`, `mediation`, `characterization`, `componentOf`, `memberOf`, `composition`, `aggregation`, `instantiation`, etc.
+OntoUML/UFO relation types: `material`, `mediation`, `characterization`, `componentOf`, `memberOf`, `composition`, `aggregation`, `instantiation`, etc.
 
 ### 4. Native Data Types (6 tokens)
 Built-in types: `number`, `string`, `boolean`, `date`, `time`, `datetime`

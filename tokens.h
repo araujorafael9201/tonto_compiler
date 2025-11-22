@@ -3,9 +3,9 @@
 // enum {
 //   GENSET=1, DISJOINT, COMPLETE, GENERAL, SPECIFICS, 
 //   WHERE, PACKAGE, IMPORT, FUNCTIONAL_COMPLEXES,
-//   NUM, CLASS_ESTEREOTYPE, RELATIONSHIP_ESTEREOTYPE, 
+//   NUM, CLASS_ESTEREOTYPE, RELATION_ESTEREOTYPE, 
 //   NATIVE_DATA_TYPE, NEW_DATA_TYPE, META_ATTR,
-//   CLASS_ID, RELATIONSHIP_ID, INSTANCE_ID,
+//   CLASS_ID, RELATION_ID, INSTANCE_ID,
 //   L_BRACE, R_BRACE, L_PARENTHESIS, R_PARENTHESIS, L_BRACKET, R_BRACKET,
 //   TP, LRO, RRO, ASTERISK, AT, COLON
 // }; 
@@ -21,7 +21,7 @@ CLASS_ESTEREOTYPE:
   quantity, quality, mode, intrisicMode, extrinsicMode, subkind, phase,
   role, historicalRole.
 
-RELATIONSHIP_ESTEREOTYPE:
+RELATION_ESTEREOTYPE:
   material, derivation, comparative, mediation,
   characterization, externalDependence, componentOf, memberOf,
   subCollectionOf, subQualityOf, instantiation, termination,

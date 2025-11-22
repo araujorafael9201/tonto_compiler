@@ -15,7 +15,7 @@ using namespace std;
 delim [ \t]
 whitespaces {delim}+
 class_estereotype event|situation|pry|mixin|phaseMixin|roleMixin|historicalRoleMixin|kind|collective|quantity|quality|mode|intrisicMode|extrinsicMode|subkind|phase|role|historicalRole
-relationship_estereotype material|derivation|comparative|mediation|characterization|externalDependence|componentOf|memberOf|subCollectionOf|subQualityOf|instantiation|termination|participational|participation|historicalDependence|creation|manifestation|bringsAbout|triggers|composition|aggregation|inherence|value|formal|constitution
+relation_estereotype material|derivation|comparative|mediation|characterization|externalDependence|componentOf|memberOf|subCollectionOf|subQualityOf|instantiation|termination|participational|participation|historicalDependence|creation|manifestation|bringsAbout|triggers|composition|aggregation|inherence|value|formal|constitution
 native_data_type number|string|boolean|date|time|datetime
 meta_attr ordered|const|derived|subsets|redefines
 digit [0-9]
@@ -24,7 +24,7 @@ uppercase_letter [A-Z]
 letter {downcase_letter}|{uppercase_letter}
 new_data_type {letter}+DataType
 class {uppercase_letter}({letter}|"_")*
-relationship {downcase_letter}({letter}|"_")*
+relation {downcase_letter}({letter}|"_")*
 instance {letter}({letter}|"_")*{digit}+
 
 %%
@@ -178,6 +178,13 @@ specializes                 {
                               currentColumn+=YYLeng();
                               return LRO;
                             }
+\-\-                        {
+                              logAnalyticData(NRO,"Símbolo Especial",YYText(),lineno(),currentColumn);
+                              specialSymbolCount++;
+                              lastTokenColumn = currentColumn;  
+                              currentColumn+=YYLeng();
+                              return NRO;
+                            }
 \-\-\<\>                    { 
                               logAnalyticData(RRO,"Símbolo Especial",YYText(),lineno(),currentColumn);
                               specialSymbolCount++;
@@ -227,12 +234,12 @@ specializes                 {
                               currentColumn += YYLeng();
                               return CLASS_ESTEREOTYPE;
                             }
-{relationship_estereotype}  {
-                              logAnalyticData(RELATIONSHIP_ESTEREOTYPE,"Estereótipo de relação",YYText(),lineno(),currentColumn);
-                              relationshipEstereotypeCount++;
+{relation_estereotype}  {
+                              logAnalyticData(RELATION_ESTEREOTYPE,"Estereótipo de relação",YYText(),lineno(),currentColumn);
+                              relationEstereotypeCount++;
                               lastTokenColumn = currentColumn;  
                               currentColumn += YYLeng();
-                              return RELATIONSHIP_ESTEREOTYPE;
+                              return RELATION_ESTEREOTYPE;
                             }
 {meta_attr}                 {
                               logAnalyticData(META_ATTR,"Meta-atributo",YYText(),lineno(),currentColumn);
@@ -255,12 +262,12 @@ specializes                 {
                               currentColumn += YYLeng();
                               return CLASS_ID;
                             }
-{relationship}              {
-                              logAnalyticData(RELATIONSHIP_ID,"Identificador de relação",YYText(),lineno(),currentColumn);
-                              relationshipIdCount++;
+{relation}              {
+                              logAnalyticData(RELATION_ID,"Identificador de relação",YYText(),lineno(),currentColumn);
+                              relationIdCount++;
                               lastTokenColumn = currentColumn;  
                               currentColumn += YYLeng();
-                              return RELATIONSHIP_ID;
+                              return RELATION_ID;
                             }
 {instance}                  {
                               logAnalyticData(INSTANCE_ID,"Identificador de instância",YYText(),lineno(),currentColumn);

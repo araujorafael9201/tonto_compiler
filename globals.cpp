@@ -14,9 +14,9 @@ unsigned long nativeDataTypeCount = 0;
 unsigned long metaAttrCount = 0;
 unsigned long specialSymbolCount = 0;
 unsigned long classEsterotypeCount = 0;
-unsigned long relationshipEstereotypeCount = 0;
+unsigned long relationEstereotypeCount = 0;
 unsigned long classIdCount = 0;
-unsigned long relationshipIdCount = 0;
+unsigned long relationIdCount = 0;
 unsigned long instanceIdCount = 0;
 unsigned long newDataTypeIdCount = 0;
 unsigned long numberCount = 0;
@@ -56,9 +56,9 @@ void flushSyntheticLog()
                         << "Meta-atributos: " << metaAttrCount << '\n'
                         << "Símbolos especiais: " << specialSymbolCount << '\n'
                         << "Estereótipos de classe: " << classEsterotypeCount << '\n'
-                        << "Estereótipos de relação: " << relationshipEstereotypeCount << '\n'
+                        << "Estereótipos de relação: " << relationEstereotypeCount << '\n'
                         << "Identificadores de classe: " << classIdCount << '\n'
-                        << "Identificadores de relação: " << relationshipIdCount << '\n'
+                        << "Identificadores de relação: " << relationIdCount << '\n'
                         << "Identificadores de instância: " << instanceIdCount << '\n'
                         << "Identificadores de novo tipo de dado: " << newDataTypeIdCount << '\n'
                         << "Números: " << numberCount << '\n';
