@@ -1,0 +1,31 @@
+#pragma once
+#include <fstream>
+#include <string>
+
+// Variáveis globais
+extern int currentColumn;     // coluna atual enquanto lê o arquivo
+extern int lastTokenColumn;   // coluna onde o último token começou
+
+// Arquivos de log
+extern std::ofstream outputAnalyticData;
+extern std::ofstream outputSyntheticData;
+
+// Contadores
+extern unsigned long keywordCount;
+extern unsigned long nativeDataTypeCount;
+extern unsigned long metaAttrCount;
+extern unsigned long specialSymbolCount;
+extern unsigned long classEsterotypeCount;
+extern unsigned long relationshipEstereotypeCount;
+extern unsigned long classIdCount;
+extern unsigned long relationshipIdCount;
+extern unsigned long instanceIdCount;
+extern unsigned long newDataTypeIdCount;
+extern unsigned long numericConstantCount;
+
+// Funções globais
+void logAnalyticData(int token, const std::string& type,
+                     const char* lexeme, int line, int column);
+
+void logLexicalError(const char* lexeme, int line, int column);
+void flushSyntheticLog();
