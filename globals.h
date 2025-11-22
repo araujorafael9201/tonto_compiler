@@ -21,7 +21,7 @@ extern unsigned long classIdCount;
 extern unsigned long relationshipIdCount;
 extern unsigned long instanceIdCount;
 extern unsigned long newDataTypeIdCount;
-extern unsigned long numericConstantCount;
+extern unsigned long numberCount;
 
 // Funções globais
 void logAnalyticData(int token, const std::string& type,

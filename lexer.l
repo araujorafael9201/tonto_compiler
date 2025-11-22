@@ -19,7 +19,6 @@ relationship_estereotype material|derivation|comparative|mediation|characterizat
 native_data_type number|string|boolean|date|time|datetime
 meta_attr ordered|const|derived|subsets|redefines
 digit [0-9]
-number {digit}+(\.{digit}+)?
 downcase_letter [a-z]
 uppercase_letter [A-Z]
 letter {downcase_letter}|{uppercase_letter}
@@ -94,6 +93,34 @@ functional-complexes        {
                               lastTokenColumn = currentColumn;  
                               currentColumn += YYLeng();
                               return FUNCTIONAL_COMPLEXES;
+                            }
+datatype                    {
+                              logAnalyticData(DATATYPE, "Palavra Reservada", YYText(), lineno(), currentColumn);
+                              keywordCount++;
+                              lastTokenColumn = currentColumn;  
+                              currentColumn += YYLeng();
+                              return DATATYPE;
+                            }
+enum                        {
+                              logAnalyticData(ENUM, "Palavra Reservada", YYText(), lineno(), currentColumn);
+                              keywordCount++;
+                              lastTokenColumn = currentColumn;  
+                              currentColumn += YYLeng();
+                              return ENUM;
+                            }
+relation                    {
+                              logAnalyticData(RELATION, "Palavra Reservada", YYText(), lineno(), currentColumn);
+                              keywordCount++;
+                              lastTokenColumn = currentColumn;  
+                              currentColumn += YYLeng();
+                              return RELATION;
+                            }
+specializes                 {
+                              logAnalyticData(SPECIALIZES, "Palavra Reservada", YYText(), lineno(), currentColumn);
+                              keywordCount++;
+                              lastTokenColumn = currentColumn;  
+                              currentColumn += YYLeng();
+                              return SPECIALIZES;
                             }
 \{                          { 
                               logAnalyticData(L_BRACE,"Símbolo Especial",YYText(),lineno(),currentColumn); 
@@ -179,12 +206,12 @@ functional-complexes        {
                               currentColumn+=YYLeng(); 
                               return COLON; 
                             }
-{number}                    {
-                              logAnalyticData(NUM,"Constante Numérica",YYText(),lineno(),currentColumn);
-                              numericConstantCount++;
+{digit}                    {
+                              logAnalyticData(NUMBER,"Número",YYText(),lineno(),currentColumn);
+                              numberCount++;
                               lastTokenColumn = currentColumn;  
                               currentColumn += YYLeng();
-                              return NUM;
+                              return NUMBER;
                             }
 {native_data_type}          {
                               logAnalyticData(NATIVE_DATA_TYPE,"Tipo de dado nativo",YYText(),lineno(),currentColumn);

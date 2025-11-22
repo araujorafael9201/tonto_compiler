@@ -19,7 +19,7 @@ unsigned long classIdCount = 0;
 unsigned long relationshipIdCount = 0;
 unsigned long instanceIdCount = 0;
 unsigned long newDataTypeIdCount = 0;
-unsigned long numericConstantCount = 0;
+unsigned long numberCount = 0;
 
 // Funções globais
 void logAnalyticData(int token, const std::string& type,
@@ -61,5 +61,5 @@ void flushSyntheticLog()
                         << "Identificadores de relação: " << relationshipIdCount << '\n'
                         << "Identificadores de instância: " << instanceIdCount << '\n'
                         << "Identificadores de novo tipo de dado: " << newDataTypeIdCount << '\n'
-                        << "Constantes numéricas: " << numericConstantCount << '\n';
+                        << "Números: " << numberCount << '\n';
 }
