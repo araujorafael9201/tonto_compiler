@@ -214,7 +214,7 @@ specializes                 {
                               return COLON; 
                             }
 \,                          {
-                              logAnalyticData(COLON,"Símbolo Especial",YYText(),lineno(),currentColumn);
+                              logAnalyticData(COMMA,"Símbolo Especial",YYText(),lineno(),currentColumn);
                               specialSymbolCount++;
                               lastTokenColumn = currentColumn;  
                               currentColumn+=YYLeng(); 
