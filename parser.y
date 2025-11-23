@@ -15,13 +15,18 @@ void yyerror(const char *s);
 
 %define parse.error verbose
 
-%token PACKAGE "package"
-%token GENSET DISJOINT COMPLETE GENERAL SPECIFICS WHERE IMPORT FUNCTIONAL_COMPLEXES DATATYPE SPECIALIZES ENUM RELATION NUMBER CLASS_ESTEREOTYPE RELATION_ESTEREOTYPE NATIVE_DATA_TYPE NEW_DATA_TYPE META_ATTR CLASS_ID RELATION_ID INSTANCE_ID L_BRACE R_BRACE L_PARENTHESIS R_PARENTHESIS L_BRACKET R_BRACKET TP LRO NRO RRO ASTERISK AT COLON
+%token PACKAGE "package" SPECIALIZES "specializes"
+%token CLASS_ID "class name" RELATION_ID "relation name"
+%token CLASS_ESTEREOTYPE "class estereotype" RELATION_ESTEREOTYPE "relation estereotype"
+%token NATIVE_DATA_TYPE "native data type" NEW_DATA_TYPE "data type"
+%token META_ATTR "meta-attribute"
+%token L_BRACE "{" R_BRACE "}" COLON ":" AT "@" L_BRACKET "[" R_BRACKET "]" TP ".." ASTERISK "*" LRO "<>--" NRO "--" RRO "--<>" 
+%token NUMBER "number"
+%token GENSET DISJOINT COMPLETE GENERAL SPECIFICS WHERE IMPORT FUNCTIONAL_COMPLEXES DATATYPE ENUM RELATION INSTANCE_ID L_PARENTHESIS R_PARENTHESIS   
 
 %%
 
 start : package body
-      |
       ;
 
 body  : body statement
@@ -110,7 +115,5 @@ int main(int argc, char **argv)
 
 void yyerror(const char *s)
 {
-    cerr << "Erro sintático: \"" << lexer.YYText()
-         << "\" (linha " << lexer.lineno()
-         << ", coluna " << lastTokenColumn << ")\n";
+    cerr << s << " (line " << lexer.lineno() << ", column " << lastTokenColumn << ")\n";
 }
