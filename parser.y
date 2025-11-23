@@ -36,6 +36,7 @@ body  : body statement
 statement : class
           | newDataType
           | generalization
+          | externalRelation
           ;
 
 package : PACKAGE CLASS_ID { cout << "Declaração de Pacote\n"; }
@@ -80,6 +81,8 @@ internalRelations : internalRelations internalRelation
 
 internalRelation  : AT RELATION_ESTEREOTYPE cardinality relationOperator cardinality CLASS_ID { cout << "Declaração de Relação Interna\n"; }
                   ;
+
+externalRelation : AT RELATION_ESTEREOTYPE RELATION CLASS_ID cardinality relationOperator cardinality CLASS_ID { cout << "Declaração de Relação Externa\n"; }
 
 cardinality : L_BRACKET cardinalityBody R_BRACKET
             ;
