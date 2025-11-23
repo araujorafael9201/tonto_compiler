@@ -2,6 +2,7 @@
 #include <iostream>
 #include <FlexLexer.h>
 #include <fstream>
+#include <vector>
 #include "globals.h"
 
 using namespace std;
@@ -40,11 +41,11 @@ statement : class
           | enum
           ;
 
-package : PACKAGE CLASS_ID { cout << "Declaração de Pacote\n"; }
+package : PACKAGE CLASS_ID { packageNames.push_back(currentLexeme); cout << "Declaração de Pacote: " << currentLexeme << "\n"; }
         ;
 
-enum : ENUM CLASS_ID enumBody { cout << "Declaração de ENUM\n"; }
-     ;
+enum  : ENUM CLASS_ID { enumNames.push_back(currentLexeme); } enumBody { cout << "Declaração de ENUM\n"; }
+      ;
 
 enumBody : L_BRACE enumIndividuals R_BRACE
          ;
@@ -56,7 +57,10 @@ enumIndividuals : INSTANCE_ID COMMA enumIndividuals
 class : classHeader classBody { cout << "Declaração de Classe\n"; }
       ;
 
-classHeader : CLASS_ESTEREOTYPE CLASS_ID
+classHeader : CLASS_ESTEREOTYPE CLASS_ID {
+                currentParsingClass = currentLexeme; // Salva contexto para relações internas
+                classNames.push_back(currentLexeme);
+            }
             ;
 
 classBody : L_BRACE attributes internalRelations R_BRACE
@@ -76,7 +80,9 @@ datatype  : NATIVE_DATA_TYPE
 newDataType : newDataTypeHeader newDataTypeBody { cout << "Declaração de Novo Tipo de Dados\n"; }
             ;
 
-newDataTypeHeader : DATATYPE NEW_DATA_TYPE
+newDataTypeHeader : DATATYPE NEW_DATA_TYPE {
+                        newDataTypeNames.push_back(currentLexeme);
+                  }
                   ;
 
 newDataTypeBody : L_BRACE attributes R_BRACE
@@ -88,17 +94,19 @@ metaAttribute : L_BRACE META_ATTR R_BRACE
 
 internalRelations : internalRelations internalRelation
                   |
+                  ;
 
 internalRelation  : AT RELATION_ESTEREOTYPE cardinality relationOperator cardinality CLASS_ID { cout << "Declaração de Relação Interna\n"; }
                   ;
 
-externalRelation : AT RELATION_ESTEREOTYPE RELATION CLASS_ID cardinality relationOperator cardinality CLASS_ID { cout << "Declaração de Relação Externa\n"; }
+externalRelation  : AT RELATION_ESTEREOTYPE RELATION CLASS_ID cardinality relationOperator cardinality CLASS_ID { cout << "Declaração de Relação Externa\n"; }
+                  ;
 
 cardinality : L_BRACKET cardinalityBody R_BRACKET
             ;
 
 cardinalityBody : NUMBER cardinalityEnding
-                  ;
+                ;
 
 cardinalityEnding : TP ASTERISK
                   |
@@ -108,7 +116,8 @@ generalization : inlineGeneralization
                | blockGeneralization
                ;
 
-inlineGeneralization : generalizationHeader WHERE generalizationSpecifics SPECIALIZES CLASS_ID { cout << "Generalização em Linha\n"; }
+inlineGeneralization  : generalizationHeader WHERE generalizationSpecifics SPECIALIZES CLASS_ID { cout << "Generalização em Linha\n"; }
+                      ;
 
 generalizationHeader : generalizationRestrictions GENSET CLASS_ID
                      ;
@@ -127,7 +136,8 @@ generalizationSpecifics : CLASS_ID COMMA generalizationSpecifics
 blockGeneralization : generalizationHeader generalizationBody { cout << "Generalização em Bloco\n"; }
                     ;
 
-generalizationBody : L_BRACE GENERAL CLASS_ID SPECIFICS generalizationSpecifics R_BRACE
+generalizationBody  : L_BRACE GENERAL CLASS_ID SPECIFICS generalizationSpecifics R_BRACE
+                    ;
 
 relationOperator  : LRO
                   | NRO
@@ -154,7 +164,7 @@ int main(int argc, char **argv)
 
     int result = yyparse();
 
-    flushSyntheticLog();
+    flushSyntacticLog();
 
     outputAnalyticData.close();
     outputSyntheticData.close();
@@ -164,5 +174,5 @@ int main(int argc, char **argv)
 
 void yyerror(const char *s)
 {
-    cerr << s << " (line " << lexer.lineno() << ", column " << lastTokenColumn << ")\n";
+    cerr << s << " (\"" << lexer.YYText() << "\" at line " << lexer.lineno() << ", column " << lastTokenColumn << ")\n";
 }

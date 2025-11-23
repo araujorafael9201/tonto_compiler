@@ -239,6 +239,7 @@ specializes                 {
                               classEsterotypeCount++;
                               lastTokenColumn = currentColumn;  
                               currentColumn += YYLeng();
+                              currentLexeme = YYText();
                               return CLASS_ESTEREOTYPE;
                             }
 {relation_estereotype}  {
@@ -246,6 +247,7 @@ specializes                 {
                               relationEstereotypeCount++;
                               lastTokenColumn = currentColumn;  
                               currentColumn += YYLeng();
+                              currentLexeme = YYText();
                               return RELATION_ESTEREOTYPE;
                             }
 {meta_attr}                 {
@@ -260,6 +262,7 @@ specializes                 {
                               newDataTypeIdCount++;
                               lastTokenColumn = currentColumn;  
                               currentColumn += YYLeng();
+                              currentLexeme = YYText();
                               return NEW_DATA_TYPE;
                             }
 {class}                     {
@@ -267,6 +270,7 @@ specializes                 {
                               classIdCount++;
                               lastTokenColumn = currentColumn;  
                               currentColumn += YYLeng();
+                              currentLexeme = YYText();
                               return CLASS_ID;
                             }
 {relation}              {
@@ -274,6 +278,7 @@ specializes                 {
                               relationIdCount++;
                               lastTokenColumn = currentColumn;  
                               currentColumn += YYLeng();
+                              currentLexeme = YYText();
                               return RELATION_ID;
                             }
 {instance}                  {
@@ -281,6 +286,7 @@ specializes                 {
                               instanceIdCount++;
                               lastTokenColumn = currentColumn;  
                               currentColumn += YYLeng();
+                              currentLexeme = YYText();
                               return INSTANCE_ID;
                             }
 .                           {

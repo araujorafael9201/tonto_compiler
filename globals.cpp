@@ -2,7 +2,15 @@
 #include <sstream>
 #include <iostream>
 
-// Variáveis globais
+std::string currentLexeme = "";
+std::string currentParsingClass = "";
+
+std::vector<std::string> packageNames;
+std::vector<std::string> classNames;
+std::vector<std::string> newDataTypeNames;
+std::vector<std::string> enumNames;
+
+
 int currentColumn = 1;
 int lastTokenColumn = 1;
 
@@ -47,10 +55,25 @@ void logLexicalError(const char* lexeme, int line, int column)
     }
 }
 
-void flushSyntheticLog()
+void flushSyntacticLog()
 {
     if (!outputSyntheticData.is_open()) return;
 
+    outputSyntheticData << "=== RELATÓRIO SINTÁTICO ===\n\n";
+
+    outputSyntheticData << "1. PACOTES (" << packageNames.size() << "):\n";
+    for (const auto& name : packageNames) outputSyntheticData << "   - " << name << "\n";
+
+    outputSyntheticData << "\n2. CLASSES (" << classNames.size() << "):\n";
+    for (const auto& name : classNames) outputSyntheticData << "   - " << name << "\n";
+
+    outputSyntheticData << "\n3. NOVOS TIPOS DE DADOS (" << newDataTypeNames.size() << "):\n";
+    for (const auto& name : newDataTypeNames) outputSyntheticData << "   - " << name << "\n";
+
+    outputSyntheticData << "\n4. ENUMS (" << enumNames.size() << "):\n";
+    for (const auto& name : enumNames) outputSyntheticData << "   - " << name << "\n";
+    
+    outputSyntheticData << "\n=== ESTATÍSTICAS LÉXICAS ===\n";
     outputSyntheticData << "Palavras Reservadas: " << keywordCount << '\n'
                         << "Tipos de dados nativos: " << nativeDataTypeCount << '\n'
                         << "Meta-atributos: " << metaAttrCount << '\n'
@@ -63,3 +86,4 @@ void flushSyntheticLog()
                         << "Identificadores de novo tipo de dado: " << newDataTypeIdCount << '\n'
                         << "Números: " << numberCount << '\n';
 }
+
