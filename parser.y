@@ -37,10 +37,21 @@ statement : class
           | newDataType
           | generalization
           | externalRelation
+          | enum
           ;
 
 package : PACKAGE CLASS_ID { cout << "Declaração de Pacote\n"; }
         ;
+
+enum : ENUM CLASS_ID enumBody { cout << "Declaração de ENUM\n"; }
+     ;
+
+enumBody : L_BRACE enumIndividuals R_BRACE
+         ;
+
+enumIndividuals : CLASS_ID COMMA enumIndividuals
+                | CLASS_ID
+                ;
 
 class : classHeader classBody { cout << "Declaração de Classe\n"; }
       ;
