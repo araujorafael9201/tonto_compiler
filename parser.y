@@ -20,9 +20,9 @@ void yyerror(const char *s);
 %token CLASS_ESTEREOTYPE "class estereotype" RELATION_ESTEREOTYPE "relation estereotype"
 %token NATIVE_DATA_TYPE "native data type" NEW_DATA_TYPE "data type"
 %token META_ATTR "meta-attribute"
-%token L_BRACE "{" R_BRACE "}" COLON ":" AT "@" L_BRACKET "[" R_BRACKET "]" TP ".." ASTERISK "*" LRO "<>--" NRO "--" RRO "--<>" 
+%token L_BRACE "{" R_BRACE "}" COLON ":" AT "@" L_BRACKET "[" R_BRACKET "]" TP ".." ASTERISK "*" LRO "<>--" NRO "--" RRO "--<>" COMMA ","
 %token NUMBER "number"
-%token GENSET DISJOINT COMPLETE GENERAL SPECIFICS WHERE IMPORT FUNCTIONAL_COMPLEXES DATATYPE ENUM RELATION INSTANCE_ID L_PARENTHESIS R_PARENTHESIS   
+%token GENSET DISJOINT COMPLETE INCOMPLETE GENERAL OVERLAPPING SPECIFICS WHERE IMPORT FUNCTIONAL_COMPLEXES DATATYPE ENUM RELATION INSTANCE_ID L_PARENTHESIS R_PARENTHESIS   
 
 %%
 
@@ -35,6 +35,7 @@ body  : body statement
   
 statement : class
           | newDataType
+          | generalization
           ;
 
 package : PACKAGE CLASS_ID { cout << "Declaração de Pacote\n"; }
@@ -89,6 +90,31 @@ cardinalityBody : NUMBER cardinalityEnding
 cardinalityEnding : TP ASTERISK
                   |
                   ;
+
+generalization : inlineGeneralization
+               | blockGeneralization
+               ;
+
+inlineGeneralization : generalizationHeader WHERE generalizationSpecifics SPECIALIZES CLASS_ID { cout << "Generalização em Linha\n"; }
+
+generalizationHeader : generalizationRestrictions GENSET CLASS_ID
+                     ;
+
+generalizationRestrictions : DISJOINT generalizationRestrictions
+                           | OVERLAPPING generalizationRestrictions
+                           | COMPLETE generalizationRestrictions
+                           | INCOMPLETE generalizationRestrictions
+                           |
+                           ;
+
+generalizationSpecifics : CLASS_ID COMMA generalizationSpecifics
+                        | CLASS_ID
+                        ;
+
+blockGeneralization : generalizationHeader generalizationBody { cout << "Generalização em Bloco\n"; }
+                    ;
+
+generalizationBody : L_BRACE GENERAL CLASS_ID SPECIFICS generalizationSpecifics R_BRACE
 
 relationOperator  : LRO
                   | NRO

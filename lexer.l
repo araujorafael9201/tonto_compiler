@@ -213,6 +213,13 @@ specializes                 {
                               currentColumn+=YYLeng(); 
                               return COLON; 
                             }
+\,                          {
+                              logAnalyticData(COLON,"Símbolo Especial",YYText(),lineno(),currentColumn);
+                              specialSymbolCount++;
+                              lastTokenColumn = currentColumn;  
+                              currentColumn+=YYLeng(); 
+                              return COMMA; 
+                            }
 {digit}                    {
                               logAnalyticData(NUMBER,"Número",YYText(),lineno(),currentColumn);
                               numberCount++;
