@@ -1,0 +1,28 @@
+package MyPackage
+
+kind Person {
+	name: string
+	birthDate: date {const}
+}
+
+datatype AddressDataType {
+  street: string
+  num: number
+}
+
+phase Child specializes Person
+
+enum EyeColor {blue1, green2, brown3}
+
+disjoint complete genset PersonAgeGroup where Child, Adult specializes Person 
+
+genset PersonAgeGroup {
+  general Person 
+  specifics Child, Adult
+}
+
+kind University {
+  @componentOf[1] <>-- [1..*] Department
+}
+
+@mediation relation EmploymentContract [1..*] -- [1] Employee

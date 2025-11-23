@@ -49,8 +49,8 @@ enum : ENUM CLASS_ID enumBody { cout << "Declaração de ENUM\n"; }
 enumBody : L_BRACE enumIndividuals R_BRACE
          ;
 
-enumIndividuals : CLASS_ID COMMA enumIndividuals
-                | CLASS_ID
+enumIndividuals : INSTANCE_ID COMMA enumIndividuals
+                | INSTANCE_ID
                 ;
 
 class : classHeader classBody { cout << "Declaração de Classe\n"; }
@@ -77,7 +77,6 @@ newDataType : newDataTypeHeader newDataTypeBody { cout << "Declaração de Novo 
             ;
 
 newDataTypeHeader : DATATYPE NEW_DATA_TYPE
-                  | DATATYPE CLASS_ID // Errado mas o léxico identifica nomes de datatypes como classe
                   ;
 
 newDataTypeBody : L_BRACE attributes R_BRACE
