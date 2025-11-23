@@ -34,6 +34,7 @@ body  : body statement
       ;
   
 statement : class
+          | newDataType
           ;
 
 package : PACKAGE CLASS_ID { cout << "Declaração de Pacote\n"; }
@@ -57,8 +58,17 @@ attribute : RELATION_ID COLON datatype metaAttribute
           ;
 
 datatype  : NATIVE_DATA_TYPE
-          | NEW_DATA_TYPE
           ;
+
+newDataType : newDataTypeHeader newDataTypeBody { cout << "Declaração de Novo Tipo de Dados\n"; }
+            ;
+
+newDataTypeHeader : DATATYPE NEW_DATA_TYPE
+                  | DATATYPE CLASS_ID // Errado mas o léxico identifica nomes de datatypes como classe
+                  ;
+
+newDataTypeBody : L_BRACE attributes R_BRACE
+                ;
 
 metaAttribute : L_BRACE META_ATTR R_BRACE
               |
