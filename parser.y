@@ -7,9 +7,9 @@
 
 using namespace std;
 
-yyFlexLexer lexer;
+yyFlexLexer *lexer;
 
-int yylex() { return lexer.yylex(); }
+int yylex() { return lexer->yylex(); }
 
 void yyerror(const char *s);
 
@@ -189,31 +189,69 @@ relationOperator  : LRO
 
 int main(int argc, char **argv)
 {
-    ifstream fin;
-
-    if (argc > 1) {
-        fin.open(argv[1]);
-        if (!fin.is_open()) {
-            cerr << "Arquivo " << argv[1] << " Não pôde ser aberto" << endl;
-            return 1;
-        }
-        lexer.switch_streams(&fin);
+    if (argc < 2) {
+        cerr << "Uso: " << argv[0] << " <arquivo1.tonto> [arquivo2.tonto ...]" << endl;
+        return 1;
     }
 
-    outputAnalyticData.open("analyticData.log");
-    outputSyntheticData.open("syntheticData.log");
+    for (int i = 1; i < argc; ++i) {
+        string inputFilename = argv[i];
+        ifstream fin(inputFilename);
 
-    int result = yyparse();
+        if (!fin.is_open()) {
+            cerr << "Arquivo " << inputFilename << " não pôde ser aberto." << endl;
+            continue;
+        }
 
-    flushSyntacticLog();
+        // Reinicia o estado global
+        resetGlobals();
+        tempRelStereotype = "";
+        tempGenSetName = "";
+        tempSpecificsList.clear();
 
-    outputAnalyticData.close();
-    outputSyntheticData.close();
+        // Cria um novo lexer para o arquivo atual
+        lexer = new yyFlexLexer(&fin);
 
-    return result;
+        // Define nomes dos arquivos de log
+        string baseName = inputFilename;
+        size_t lastDot = baseName.find_last_of(".");
+        if (lastDot != string::npos) {
+            baseName = baseName.substr(0, lastDot);
+        }
+        
+        string analyticLogName = baseName + "_analytic.log";
+        string syntheticLogName = baseName + "_synthetic.log";
+
+        outputAnalyticData.open(analyticLogName);
+        outputSyntheticData.open(syntheticLogName);
+
+        if (!outputAnalyticData.is_open() || !outputSyntheticData.is_open()) {
+             cerr << "Erro ao criar arquivos de log para " << inputFilename << endl;
+             delete lexer;
+             fin.close();
+             continue;
+        }
+
+        cout << "Processando: " << inputFilename << endl;
+
+        if (yyparse() == 0) {
+            flushSyntacticLog();
+            cout << "Sucesso. Logs gerados: " << analyticLogName << ", " << syntheticLogName << endl;
+        } else {
+            cerr << "Erro ao processar " << inputFilename << endl;
+        }
+
+        outputAnalyticData.close();
+        outputSyntheticData.close();
+        
+        delete lexer;
+        fin.close();
+    }
+
+    return 0;
 }
 
 void yyerror(const char *s)
 {
-    cerr << s << " (\"" << lexer.YYText() << "\" at line " << lexer.lineno() << ", column " << lastTokenColumn << ")\n";
+    cerr << s << " (\"" << lexer->YYText() << "\" at line " << lexer->lineno() << ", column " << lastTokenColumn << ")\n";
 }
