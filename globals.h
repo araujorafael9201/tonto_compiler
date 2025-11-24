@@ -8,11 +8,26 @@ extern std::string currentLexeme; // Usada para passar o texto do Lexer para o P
 extern std::string currentParsingClass; // Usada para saber a classe atual do bloco que está sendo analisado (para relações internas)
 
 // Armazenamento de Dados Sintáticos 
+struct Generalization {
+    std::string name;
+    std::string generalClass;
+    std::vector<std::string> specificClasses;
+    bool isInline;
+};
+
+struct Relation {
+    std::string stereotype;
+    std::string sourceClass;
+    std::string targetClass;
+    bool isExternal;
+};
+
 extern std::vector<std::string> packageNames;
 extern std::vector<std::string> classNames;
 extern std::vector<std::string> newDataTypeNames;
 extern std::vector<std::string> enumNames;
-
+extern std::vector<Generalization> generalizationsList;
+extern std::vector<Relation> relationsList;
 
 // Variáveis globais
 extern int currentColumn;     // coluna atual enquanto lê o arquivo

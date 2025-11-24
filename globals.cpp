@@ -9,7 +9,8 @@ std::vector<std::string> packageNames;
 std::vector<std::string> classNames;
 std::vector<std::string> newDataTypeNames;
 std::vector<std::string> enumNames;
-
+std::vector<Generalization> generalizationsList;
+std::vector<Relation> relationsList;
 
 int currentColumn = 1;
 int lastTokenColumn = 1;
@@ -72,6 +73,23 @@ void flushSyntacticLog()
 
     outputSyntheticData << "\n4. ENUMS (" << enumNames.size() << "):\n";
     for (const auto& name : enumNames) outputSyntheticData << "   - " << name << "\n";
+
+    outputSyntheticData << "\n5. GENERALIZAÇÕES (" << generalizationsList.size() << "):\n";
+    for (const auto& gen : generalizationsList) {
+        outputSyntheticData << "   - Genset: " << gen.name << " | Mãe: " << gen.generalClass << " | Filhas: ";
+        for (size_t i = 0; i < gen.specificClasses.size(); i++) {
+            outputSyntheticData << gen.specificClasses[i] << (i < gen.specificClasses.size() - 1 ? ", " : "");
+        }
+        outputSyntheticData << "\n";
+    }
+
+    outputSyntheticData << "\n6. RELAÇÕES (" << relationsList.size() << "):\n";
+    for (const auto& rel : relationsList) {
+        outputSyntheticData << "   - Estereótipo: " << rel.stereotype 
+                            << " | Origem: " << rel.sourceClass 
+                            << " | Destino: " << rel.targetClass
+                            << " | Tipo: " << (rel.isExternal ? "Externa" : "Interna") << "\n";
+    }
     
     outputSyntheticData << "\n=== ESTATÍSTICAS LÉXICAS ===\n";
     outputSyntheticData << "Palavras Reservadas: " << keywordCount << '\n'
