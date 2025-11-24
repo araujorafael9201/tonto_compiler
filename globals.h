@@ -50,6 +50,8 @@ extern unsigned long instanceIdCount;
 extern unsigned long newDataTypeIdCount;
 extern unsigned long numberCount;
 
+void resetGlobals();
+
 // Funções globais
 void logAnalyticData(int token, const std::string& type, const char* lexeme, int line, int column);
 void logLexicalError(const char* lexeme, int line, int column);

@@ -56,6 +56,33 @@ void logLexicalError(const char* lexeme, int line, int column)
     }
 }
 
+void resetGlobals() {
+    currentLexeme = "";
+    currentParsingClass = "";
+
+    packageNames.clear();
+    classNames.clear();
+    newDataTypeNames.clear();
+    enumNames.clear();
+    generalizationsList.clear();
+    relationsList.clear();
+
+    currentColumn = 1;
+    lastTokenColumn = 1;
+
+    keywordCount = 0;
+    nativeDataTypeCount = 0;
+    metaAttrCount = 0;
+    specialSymbolCount = 0;
+    classEsterotypeCount = 0;
+    relationEstereotypeCount = 0;
+    classIdCount = 0;
+    relationIdCount = 0;
+    instanceIdCount = 0;
+    newDataTypeIdCount = 0;
+    numberCount = 0;
+}
+
 void flushSyntacticLog()
 {
     if (!outputSyntheticData.is_open()) return;
