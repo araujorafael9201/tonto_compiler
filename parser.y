@@ -14,6 +14,8 @@ int yylex() { return lexer.yylex(); }
 void yyerror(const char *s);
 
 std::string tempRelStereotype; // Armazena temporariamente o último estereótipo de relação lido
+std::string tempGenSetName;
+std::vector<std::string> tempSpecificsList;
 %}
 
 %define parse.error verbose
@@ -137,10 +139,19 @@ generalization : inlineGeneralization
                | blockGeneralization
                ;
 
-inlineGeneralization  : generalizationHeader WHERE generalizationSpecifics SPECIALIZES CLASS_ID { cout << "Generalização em Linha\n"; }
+inlineGeneralization  : generalizationHeader WHERE { tempSpecificsList.clear(); } generalizationSpecifics SPECIALIZES CLASS_ID 
+    {
+        Generalization info;
+        info.name = tempGenSetName;
+        info.generalClass = currentLexeme; // O ID logo após SPECIALIZES, classe geral
+        info.specificClasses = tempSpecificsList;
+        info.isInline = true;
+        generalizationsList.push_back(info);
+        cout << "Generalização em Linha\n";
+    }
                       ;
 
-generalizationHeader : generalizationRestrictions GENSET CLASS_ID
+generalizationHeader : generalizationRestrictions GENSET CLASS_ID { tempGenSetName = currentLexeme; } // Atualiza nome da generalização atual
                      ;
 
 generalizationRestrictions : DISJOINT generalizationRestrictions
@@ -150,14 +161,23 @@ generalizationRestrictions : DISJOINT generalizationRestrictions
                            |
                            ;
 
-generalizationSpecifics : CLASS_ID COMMA generalizationSpecifics
-                        | CLASS_ID
+generalizationSpecifics : CLASS_ID { tempSpecificsList.push_back(currentLexeme); } COMMA generalizationSpecifics
+                        | CLASS_ID { tempSpecificsList.push_back(currentLexeme); }
                         ;
 
 blockGeneralization : generalizationHeader generalizationBody { cout << "Generalização em Bloco\n"; }
                     ;
 
-generalizationBody  : L_BRACE GENERAL CLASS_ID SPECIFICS generalizationSpecifics R_BRACE
+// Aqui se utiliza currentParsingClass para manter uma referência ao nome da classe geral da generalização atual
+generalizationBody  : L_BRACE GENERAL CLASS_ID { currentParsingClass = currentLexeme; } SPECIFICS { tempSpecificsList.clear(); } generalizationSpecifics R_BRACE
+    {
+        Generalization info;
+        info.name = tempGenSetName;
+        info.generalClass = currentParsingClass;
+        info.specificClasses = tempSpecificsList;
+        info.isInline = false;
+        generalizationsList.push_back(info);
+    }
                     ;
 
 relationOperator  : LRO

@@ -80,7 +80,7 @@ void flushSyntacticLog()
         for (size_t i = 0; i < gen.specificClasses.size(); i++) {
             outputSyntheticData << gen.specificClasses[i] << (i < gen.specificClasses.size() - 1 ? ", " : "");
         }
-        outputSyntheticData << "\n";
+        outputSyntheticData << " | Tipo: " << (gen.isInline ? "Inline" : "Bloco") << "\n";
     }
 
     outputSyntheticData << "\n6. RELAÇÕES (" << relationsList.size() << "):\n";
