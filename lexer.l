@@ -292,6 +292,7 @@ specializes                 {
 .                           {
                               logLexicalError(YYText(), lineno(), currentColumn);
                               currentColumn += YYLeng();
+                              return UNKNOWN;
                             }
 %%
 

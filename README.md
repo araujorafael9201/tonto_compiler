@@ -138,7 +138,7 @@ When lexical errors are detected (for example, invalid symbols or malformed toke
 Example:
 
 ```
-ERRO LÉXICO: Lexema "," inválido. | line: 1 | column: 5
+lexical error: invalid token "," (line: 1, column: 5)
 ```
 
 ## 📝 Token Categories

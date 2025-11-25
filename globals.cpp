@@ -46,8 +46,8 @@ void logAnalyticData(int token, const std::string& type,
 void logLexicalError(const char* lexeme, int line, int column)
 {
     std::stringstream ss;
-    ss << "ERRO LÉXICO: Lexema \"" << lexeme << "\" inválido. "
-       << "(linha " << line << ", coluna " << column << ")\n";
+    ss << "lexical error: invalid token \"" << lexeme << "\" "
+       << "(line " << line << ", column " << column << ")\n";
 
     std::cerr << ss.str();
 

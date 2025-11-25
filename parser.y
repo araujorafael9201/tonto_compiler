@@ -20,18 +20,20 @@ std::vector<std::string> tempSpecificsList;
 
 %define parse.error verbose
 
+%token UNKNOWN "invalid token"
 %token PACKAGE "package" SPECIALIZES "specializes"
-%token CLASS_ID "class name" RELATION_ID "relation name"
+%token CLASS_ID "class name" RELATION_ID "relation name" INSTANCE_ID "instance name"
 %token CLASS_ESTEREOTYPE "class estereotype" RELATION_ESTEREOTYPE "relation estereotype"
 %token NATIVE_DATA_TYPE "native data type" NEW_DATA_TYPE "data type"
 %token META_ATTR "meta-attribute"
 %token L_BRACE "{" R_BRACE "}" COLON ":" AT "@" L_BRACKET "[" R_BRACKET "]" TP ".." ASTERISK "*" LRO "<>--" NRO "--" RRO "--<>" COMMA ","
 %token NUMBER "number"
-%token GENSET DISJOINT COMPLETE INCOMPLETE GENERAL OVERLAPPING SPECIFICS WHERE IMPORT FUNCTIONAL_COMPLEXES DATATYPE ENUM RELATION INSTANCE_ID L_PARENTHESIS R_PARENTHESIS   
+%token GENSET DISJOINT COMPLETE INCOMPLETE GENERAL OVERLAPPING SPECIFICS WHERE IMPORT FUNCTIONAL_COMPLEXES DATATYPE ENUM RELATION L_PARENTHESIS R_PARENTHESIS   
 
 %%
 
 start : package body
+      | error { yyerrok; } body
       ;
 
 body  : body statement
@@ -43,22 +45,24 @@ statement : class
           | generalization
           | externalRelation
           | enum
+          | error { yyclearin; }
           ;
 
-package : PACKAGE CLASS_ID { packageNames.push_back(currentLexeme); cout << "Declaração de Pacote: " << currentLexeme << "\n"; }
+package : PACKAGE CLASS_ID { packageNames.push_back(currentLexeme); }
         ;
 
-enum  : ENUM CLASS_ID { enumNames.push_back(currentLexeme); } enumBody { cout << "Declaração de ENUM\n"; }
+enum  : ENUM CLASS_ID { enumNames.push_back(currentLexeme); } enumBody 
       ;
 
-enumBody : L_BRACE enumIndividuals R_BRACE
-         ;
+enumBody  : L_BRACE enumIndividuals R_BRACE
+          | L_BRACE error R_BRACE { yyerrok; }
+          ;
 
 enumIndividuals : INSTANCE_ID COMMA enumIndividuals
                 | INSTANCE_ID
                 ;
 
-class : classHeader classBody { cout << "Declaração de Classe\n"; }
+class : classHeader classBody 
       ;
 
 classHeader : CLASS_ESTEREOTYPE CLASS_ID {
@@ -69,6 +73,8 @@ classHeader : CLASS_ESTEREOTYPE CLASS_ID {
 
 classBody : L_BRACE attributes internalRelations R_BRACE
           | SPECIALIZES CLASS_ID
+          | error R_BRACE { yyerrok; }
+          |
           ;
 
 attributes  : attributes attribute
@@ -81,7 +87,7 @@ attribute : RELATION_ID COLON datatype metaAttribute
 datatype  : NATIVE_DATA_TYPE
           ;
 
-newDataType : newDataTypeHeader newDataTypeBody { cout << "Declaração de Novo Tipo de Dados\n"; }
+newDataType : newDataTypeHeader newDataTypeBody
             ;
 
 newDataTypeHeader : DATATYPE NEW_DATA_TYPE {
@@ -90,6 +96,7 @@ newDataTypeHeader : DATATYPE NEW_DATA_TYPE {
                   ;
 
 newDataTypeBody : L_BRACE attributes R_BRACE
+                | L_BRACE error R_BRACE { yyerrok; }
                 ;
 
 metaAttribute : L_BRACE META_ATTR R_BRACE
@@ -109,7 +116,6 @@ internalRelation  : AT RELATION_ESTEREOTYPE { tempRelStereotype = currentLexeme;
         info.targetClass = currentLexeme;       // O último token lido foi o ID da classe alvo
         info.isExternal = false;
         relationsList.push_back(info);
-        cout << "Declaração de Relação Interna\n"; 
     }
                   ;
 
@@ -121,7 +127,6 @@ externalRelation  : AT RELATION_ESTEREOTYPE { tempRelStereotype = currentLexeme;
         info.targetClass = currentLexeme;
         info.isExternal = true;
         relationsList.push_back(info);
-        cout << "Declaração de Relação Externa\n"; 
     }
                   ;
 
@@ -147,7 +152,6 @@ inlineGeneralization  : generalizationHeader WHERE { tempSpecificsList.clear(); 
         info.specificClasses = tempSpecificsList;
         info.isInline = true;
         generalizationsList.push_back(info);
-        cout << "Generalização em Linha\n";
     }
                       ;
 
@@ -165,19 +169,20 @@ generalizationSpecifics : CLASS_ID { tempSpecificsList.push_back(currentLexeme);
                         | CLASS_ID { tempSpecificsList.push_back(currentLexeme); }
                         ;
 
-blockGeneralization : generalizationHeader generalizationBody { cout << "Generalização em Bloco\n"; }
+blockGeneralization : generalizationHeader generalizationBody
                     ;
 
 // Aqui se utiliza currentParsingClass para manter uma referência ao nome da classe geral da generalização atual
 generalizationBody  : L_BRACE GENERAL CLASS_ID { currentParsingClass = currentLexeme; } SPECIFICS { tempSpecificsList.clear(); } generalizationSpecifics R_BRACE
-    {
-        Generalization info;
-        info.name = tempGenSetName;
-        info.generalClass = currentParsingClass;
-        info.specificClasses = tempSpecificsList;
-        info.isInline = false;
-        generalizationsList.push_back(info);
-    }
+                    {
+                        Generalization info;
+                        info.name = tempGenSetName;
+                        info.generalClass = currentParsingClass;
+                        info.specificClasses = tempSpecificsList;
+                        info.isInline = false;
+                        generalizationsList.push_back(info);
+                    }
+                    | L_BRACE error R_BRACE { yyerrok; }
                     ;
 
 relationOperator  : LRO
@@ -232,13 +237,13 @@ int main(int argc, char **argv)
              continue;
         }
 
-        cout << "Processando: " << inputFilename << endl;
+        cout << "Processing: " << inputFilename << endl;
 
         if (yyparse() == 0) {
             flushSyntacticLog();
-            cout << "Sucesso. Logs gerados: " << analyticLogName << ", " << syntheticLogName << endl;
+            cout << "Logs: " << analyticLogName << ", " << syntheticLogName << endl << endl;
         } else {
-            cerr << "Erro ao processar " << inputFilename << endl;
+            cerr << "Error " << inputFilename << endl;
         }
 
         outputAnalyticData.close();
