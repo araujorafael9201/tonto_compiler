@@ -21,14 +21,13 @@ std::vector<std::string> tempSpecificsList;
 %define parse.error verbose
 
 %token UNKNOWN "invalid token"
-%token PACKAGE "package" SPECIALIZES "specializes"
+%token PACKAGE "package" SPECIALIZES "specializes" GENSET "genset" DISJOINT "disjoint" COMPLETE "complete" INCOMPLETE "incomplete" GENERAL "general" OVERLAPPING "overlapping" SPECIFICS "specifics" WHERE "where" IMPORT "import" FUNCTIONAL_COMPLEXES "functional-complexes" DATATYPE "datatype" ENUM "enum" RELATION "relation" 
 %token CLASS_ID "class name" RELATION_ID "relation name" INSTANCE_ID "instance name"
 %token CLASS_ESTEREOTYPE "class estereotype" RELATION_ESTEREOTYPE "relation estereotype"
 %token NATIVE_DATA_TYPE "native data type" NEW_DATA_TYPE "data type"
 %token META_ATTR "meta-attribute"
-%token L_BRACE "{" R_BRACE "}" COLON ":" AT "@" L_BRACKET "[" R_BRACKET "]" TP ".." ASTERISK "*" LRO "<>--" NRO "--" RRO "--<>" COMMA ","
-%token NUMBER "number"
-%token GENSET DISJOINT COMPLETE INCOMPLETE GENERAL OVERLAPPING SPECIFICS WHERE IMPORT FUNCTIONAL_COMPLEXES DATATYPE ENUM RELATION L_PARENTHESIS R_PARENTHESIS   
+%token L_BRACE "{" R_BRACE "}" COLON ":" AT "@" L_BRACKET "[" R_BRACKET "]" TP ".." ASTERISK "*" LRO "<>--" NRO "--" RRO "--<>" COMMA "," L_PARENTHESIS "(" R_PARENTHESIS ")"
+%token NUMBER "number"                  
 
 %%
 
@@ -109,25 +108,25 @@ internalRelations : internalRelations internalRelation
 
 /* Relação Interna: A classe origem é 'currentParsingClass', o alvo é o último CLASS_ID lido */
 internalRelation  : AT RELATION_ESTEREOTYPE { tempRelStereotype = currentLexeme; } cardinality relationOperator cardinality CLASS_ID
-    {
-        Relation info;
-        info.stereotype = tempRelStereotype;
-        info.sourceClass = currentParsingClass;
-        info.targetClass = currentLexeme;       // O último token lido foi o ID da classe alvo
-        info.isExternal = false;
-        relationsList.push_back(info);
-    }
+                  {
+                      Relation info;
+                      info.stereotype = tempRelStereotype;
+                      info.sourceClass = currentParsingClass;
+                      info.targetClass = currentLexeme;       // O último token lido foi o ID da classe alvo
+                      info.isExternal = false;
+                      relationsList.push_back(info);
+                  }
                   ;
 
 externalRelation  : AT RELATION_ESTEREOTYPE { tempRelStereotype = currentLexeme; } RELATION CLASS_ID { currentParsingClass = currentLexeme; } cardinality relationOperator cardinality CLASS_ID 
-    {
-        Relation info;
-        info.stereotype = tempRelStereotype;
-        info.sourceClass = currentParsingClass;
-        info.targetClass = currentLexeme;
-        info.isExternal = true;
-        relationsList.push_back(info);
-    }
+                  {
+                      Relation info;
+                      info.stereotype = tempRelStereotype;
+                      info.sourceClass = currentParsingClass;
+                      info.targetClass = currentLexeme;
+                      info.isExternal = true;
+                      relationsList.push_back(info);
+                  }
                   ;
 
 cardinality : L_BRACKET cardinalityBody R_BRACKET
@@ -145,14 +144,14 @@ generalization : inlineGeneralization
                ;
 
 inlineGeneralization  : generalizationHeader WHERE { tempSpecificsList.clear(); } generalizationSpecifics SPECIALIZES CLASS_ID 
-    {
-        Generalization info;
-        info.name = tempGenSetName;
-        info.generalClass = currentLexeme; // O ID logo após SPECIALIZES, classe geral
-        info.specificClasses = tempSpecificsList;
-        info.isInline = true;
-        generalizationsList.push_back(info);
-    }
+                      {
+                          Generalization info;
+                          info.name = tempGenSetName;
+                          info.generalClass = currentLexeme; // O ID logo após SPECIALIZES, classe geral
+                          info.specificClasses = tempSpecificsList;
+                          info.isInline = true;
+                          generalizationsList.push_back(info);
+                      }
                       ;
 
 generalizationHeader : generalizationRestrictions GENSET CLASS_ID { tempGenSetName = currentLexeme; } // Atualiza nome da generalização atual
