@@ -291,6 +291,7 @@ specializes                 {
                             }
 .                           {
                               logLexicalError(YYText(), lineno(), currentColumn);
+                              lastTokenColumn = currentColumn;
                               currentColumn += YYLeng();
                               return UNKNOWN;
                             }
