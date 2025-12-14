@@ -14,7 +14,8 @@ using namespace std;
 
 delim [ \t]
 whitespaces {delim}+
-class_estereotype event|situation|pry|mixin|phaseMixin|roleMixin|historicalRoleMixin|kind|collective|quantity|quality|mode|intrisicMode|extrinsicMode|subkind|phase|role|historicalRole
+/* Adicionado 'relator' ao final da lista de estereótipos */
+class_estereotype event|situation|pry|mixin|phaseMixin|roleMixin|historicalRoleMixin|kind|collective|quantity|quality|mode|intrisicMode|extrinsicMode|subkind|phase|role|historicalRole|relator
 relation_estereotype material|derivation|comparative|mediation|characterization|externalDependence|componentOf|memberOf|subCollectionOf|subQualityOf|instantiation|termination|participational|participation|historicalDependence|creation|manifestation|bringsAbout|triggers|composition|aggregation|inherence|value|formal|constitution
 native_data_type number|string|boolean|date|time|datetime
 meta_attr ordered|const|derived|subsets|redefines
@@ -123,7 +124,7 @@ specializes                 {
                               return SPECIALIZES;
                             }
 \{                          { 
-                              logAnalyticData(L_BRACE,"Símbolo Especial",YYText(),lineno(),currentColumn); 
+                              logAnalyticData(L_BRACE,"Símbolo Especial",YYText(),lineno(),currentColumn);
                               specialSymbolCount++; 
                               lastTokenColumn = currentColumn;  
                               currentColumn+=YYLeng();
@@ -144,7 +145,7 @@ specializes                 {
                               return L_PARENTHESIS;
                             }
 \)                          {
-                              logAnalyticData(R_PARENTHESIS,"Símbolo Especial",YYText(),lineno(),currentColumn); 
+                              logAnalyticData(R_PARENTHESIS,"Símbolo Especial",YYText(),lineno(),currentColumn);
                               specialSymbolCount++;
                               lastTokenColumn = currentColumn;  
                               currentColumn+=YYLeng();
@@ -192,7 +193,7 @@ specializes                 {
                               currentColumn+=YYLeng();
                               return RRO;
                             }
-\*                          {
+\* {
                               logAnalyticData(ASTERISK,"Símbolo Especial",YYText(),lineno(),currentColumn);
                               specialSymbolCount++;
                               lastTokenColumn = currentColumn;  
@@ -296,4 +297,3 @@ specializes                 {
                               return UNKNOWN;
                             }
 %%
-

@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-
+#include <map>
 
 extern std::string currentLexeme; // Usada para passar o texto do Lexer para o Parser de forma simples
 extern std::string currentParsingClass; // Usada para saber a classe atual do bloco que está sendo analisado (para relações internas)
@@ -13,6 +13,9 @@ struct Generalization {
     std::string generalClass;
     std::vector<std::string> specificClasses;
     bool isInline;
+    // Campos adicionados para análise semântica
+    bool isDisjoint;
+    bool isComplete;
 };
 
 struct Relation {
@@ -28,6 +31,9 @@ extern std::vector<std::string> newDataTypeNames;
 extern std::vector<std::string> enumNames;
 extern std::vector<Generalization> generalizationsList;
 extern std::vector<Relation> relationsList;
+
+// Mapa global para guardar o estereótipo de cada classe (NomeDaClasse -> Estereótipo)
+extern std::map<std::string, std::string> classStereotypes;
 
 // Variáveis globais
 extern int currentColumn;     // coluna atual enquanto lê o arquivo
@@ -57,3 +63,6 @@ void logAnalyticData(int token, const std::string& type, const char* lexeme, int
 void logLexicalError(const char* lexeme, int line, int column);
 
 void flushSyntacticLog();
+
+// Nova função para executar a análise semântica e coerção
+void performSemanticAnalysis();

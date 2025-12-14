@@ -13,9 +13,19 @@ int yylex() { return lexer->yylex(); }
 
 void yyerror(const char *s);
 
-std::string tempRelStereotype; // Armazena temporariamente o último estereótipo de relação lido
+// Variáveis temporárias para construção das estruturas
+std::string tempRelStereotype; 
 std::string tempGenSetName;
 std::vector<std::string> tempSpecificsList;
+std::string tempClassStereotype; // Armazena estereótipo da classe sendo lida
+bool tempDisjoint = false;       // Flags do genset
+bool tempComplete = false;
+
+// Função auxiliar para resetar as flags antes de ler um novo genset
+void resetGenFlags() {
+    tempDisjoint = false;
+    tempComplete = false;
+}
 %}
 
 %define parse.error verbose
@@ -27,7 +37,8 @@ std::vector<std::string> tempSpecificsList;
 %token NATIVE_DATA_TYPE "native data type" NEW_DATA_TYPE "data type"
 %token META_ATTR "meta-attribute"
 %token L_BRACE "{" R_BRACE "}" COLON ":" AT "@" L_BRACKET "[" R_BRACKET "]" TP ".." ASTERISK "*" LRO "<>--" NRO "--" RRO "--<>" COMMA "," L_PARENTHESIS "(" R_PARENTHESIS ")"
-%token NUMBER "number"                  
+%token NUMBER "number"          
+        
 
 %%
 
@@ -38,7 +49,7 @@ start : package body
 body  : body statement
       |
       ;
-  
+
 statement : class
           | newDataType
           | generalization
@@ -64,10 +75,12 @@ enumIndividuals : INSTANCE_ID COMMA enumIndividuals
 class : classHeader classBody 
       ;
 
-classHeader : CLASS_ESTEREOTYPE CLASS_ID {
-                currentParsingClass = currentLexeme; // Salva contexto para relações internas
+// Modificado: armazena o estereótipo da classe
+classHeader : CLASS_ESTEREOTYPE { tempClassStereotype = currentLexeme; } CLASS_ID {
+                currentParsingClass = currentLexeme;
                 classNames.push_back(currentLexeme);
-            }
+                classStereotypes[currentLexeme] = tempClassStereotype; // Mapeia classe -> estereótipo
+             }
             ;
 
 classBody : L_BRACE attributes internalRelations R_BRACE
@@ -78,7 +91,7 @@ classBody : L_BRACE attributes internalRelations R_BRACE
 
 attributes  : attributes attribute
             |
-            ; 
+            ;
 
 attribute : RELATION_ID COLON datatype metaAttribute
           ;
@@ -91,7 +104,7 @@ newDataType : newDataTypeHeader newDataTypeBody
 
 newDataTypeHeader : DATATYPE NEW_DATA_TYPE {
                         newDataTypeNames.push_back(currentLexeme);
-                  }
+                    }
                   ;
 
 newDataTypeBody : L_BRACE attributes R_BRACE
@@ -103,16 +116,14 @@ metaAttribute : L_BRACE META_ATTR R_BRACE
               ;
 
 internalRelations : internalRelations internalRelation
-                  |
-                  ;
+                  | ;
 
-/* Relação Interna: A classe origem é 'currentParsingClass', o alvo é o último CLASS_ID lido */
 internalRelation  : AT RELATION_ESTEREOTYPE { tempRelStereotype = currentLexeme; } cardinality relationOperator cardinality CLASS_ID
                   {
                       Relation info;
                       info.stereotype = tempRelStereotype;
                       info.sourceClass = currentParsingClass;
-                      info.targetClass = currentLexeme;       // O último token lido foi o ID da classe alvo
+                      info.targetClass = currentLexeme;       
                       info.isExternal = false;
                       relationsList.push_back(info);
                   }
@@ -136,33 +147,35 @@ cardinalityBody : NUMBER cardinalityEnding
                 ;
 
 cardinalityEnding : TP ASTERISK
-                  |
-                  ;
+                  | ;
 
-generalization : inlineGeneralization
-               | blockGeneralization
+// Ação vazia antes das alternativas para garantir reset das flags
+generalization : { resetGenFlags(); } inlineGeneralization
+               | { resetGenFlags(); } blockGeneralization
                ;
 
 inlineGeneralization  : generalizationHeader WHERE { tempSpecificsList.clear(); } generalizationSpecifics SPECIALIZES CLASS_ID 
                       {
                           Generalization info;
                           info.name = tempGenSetName;
-                          info.generalClass = currentLexeme; // O ID logo após SPECIALIZES, classe geral
+                          info.generalClass = currentLexeme;
                           info.specificClasses = tempSpecificsList;
                           info.isInline = true;
+                          info.isDisjoint = tempDisjoint; // Salva flags
+                          info.isComplete = tempComplete;
                           generalizationsList.push_back(info);
                       }
                       ;
 
-generalizationHeader : generalizationRestrictions GENSET CLASS_ID { tempGenSetName = currentLexeme; } // Atualiza nome da generalização atual
+generalizationHeader : generalizationRestrictions GENSET CLASS_ID { tempGenSetName = currentLexeme; } 
                      ;
 
-generalizationRestrictions : DISJOINT generalizationRestrictions
-                           | OVERLAPPING generalizationRestrictions
-                           | COMPLETE generalizationRestrictions
-                           | INCOMPLETE generalizationRestrictions
-                           |
-                           ;
+// Captura as restrições
+generalizationRestrictions : DISJOINT { tempDisjoint = true; } generalizationRestrictions
+                           | OVERLAPPING { tempDisjoint = false; } generalizationRestrictions
+                           | COMPLETE { tempComplete = true; } generalizationRestrictions
+                           | INCOMPLETE { tempComplete = false; } generalizationRestrictions
+                           | ;
 
 generalizationSpecifics : CLASS_ID { tempSpecificsList.push_back(currentLexeme); } COMMA generalizationSpecifics
                         | CLASS_ID { tempSpecificsList.push_back(currentLexeme); }
@@ -171,7 +184,6 @@ generalizationSpecifics : CLASS_ID { tempSpecificsList.push_back(currentLexeme);
 blockGeneralization : generalizationHeader generalizationBody
                     ;
 
-// Aqui se utiliza currentParsingClass para manter uma referência ao nome da classe geral da generalização atual
 generalizationBody  : L_BRACE GENERAL CLASS_ID { currentParsingClass = currentLexeme; } SPECIFICS { tempSpecificsList.clear(); } generalizationSpecifics R_BRACE
                     {
                         Generalization info;
@@ -179,6 +191,8 @@ generalizationBody  : L_BRACE GENERAL CLASS_ID { currentParsingClass = currentLe
                         info.generalClass = currentParsingClass;
                         info.specificClasses = tempSpecificsList;
                         info.isInline = false;
+                        info.isDisjoint = tempDisjoint; // Salva flags
+                        info.isComplete = tempComplete;
                         generalizationsList.push_back(info);
                     }
                     | L_BRACE error R_BRACE { yyerrok; }
@@ -209,14 +223,9 @@ int main(int argc, char **argv)
 
         // Reinicia o estado global
         resetGlobals();
-        tempRelStereotype = "";
-        tempGenSetName = "";
-        tempSpecificsList.clear();
-
-        // Cria um novo lexer para o arquivo atual
+        
         lexer = new yyFlexLexer(&fin);
 
-        // Define nomes dos arquivos de log
         string baseName = inputFilename;
         size_t lastDot = baseName.find_last_of(".");
         if (lastDot != string::npos) {
@@ -237,9 +246,12 @@ int main(int argc, char **argv)
         }
 
         cout << "Processing: " << inputFilename << endl;
-
         if (yyparse() == 0) {
             flushSyntacticLog();
+            
+            // EXECUTA A ANÁLISE SEMÂNTICA
+            performSemanticAnalysis();
+            
             cout << "Logs: " << analyticLogName << ", " << syntheticLogName << endl << endl;
         } else {
             cerr << "Error " << inputFilename << endl;
