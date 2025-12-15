@@ -50,8 +50,6 @@ import : IMPORT CLASS_ID import
        |
        ;
 
-package : PACKAGE CLASS_ID body
-
 body  : body statement
       |
       ;
