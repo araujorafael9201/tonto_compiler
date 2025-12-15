@@ -142,57 +142,103 @@ void performSemanticAnalysis() {
 
     outputSyntheticData << "\n=== RELATÓRIO DE ANÁLISE SEMÂNTICA ===\n";
     
-    // 1. Validar Padrões de Generalização (Subkind, Role, Phase)
+    // -- Validação de Padrões Baseados em Generalização --
+    outputSyntheticData << "\n>> Verificando Padrões de Generalização (Subkind, Role, Phase, RoleMixin)...\n";
+    
+    if (generalizationsList.empty()) {
+        outputSyntheticData << "   [INFO] Nenhuma generalização encontrada para análise.\n";
+    }
+
     for (auto& gen : generalizationsList) {
         if (gen.specificClasses.empty()) continue;
 
-        // Recupera os estereótipos da mãe e da primeira filha (assume homogeneidade no genset)
         std::string generalStereotype = classStereotypes[gen.generalClass];
-        std::string firstSpecific = gen.specificClasses[0];
-        std::string specificStereotype = classStereotypes[firstSpecific];
+        
+        for (const auto& specificClass : gen.specificClasses) {
+            std::string specificStereotype = classStereotypes[specificClass];
 
-        outputSyntheticData << ">> Analisando Genset '" << gen.name << "' (" << specificStereotype << " -> " << generalStereotype << ")...\n";
+            outputSyntheticData << "   ---------------------------------------------------\n";
+            outputSyntheticData << "   Genset: '" << gen.name << "'\n";
+            outputSyntheticData << "   Estrutura: " << specificClass << " (" << specificStereotype << ") -> " 
+                      << gen.generalClass << " (" << generalStereotype << ")\n";
 
-        // --- Padrão Subkind ---
-        if (specificStereotype == "subkind") {
-            if (generalStereotype == "kind") {
-                outputSyntheticData << "   [OK] Padrão Subkind identificado corretamente.\n";
-            } else {
-                outputSyntheticData << "   [ERRO] Subkind deve especializar Kind. (Encontrado: " << generalStereotype << ")\n";
+            bool valid = true;
+            std::string errorMsg = "";
+
+            // Definição de grupos para verificação
+            bool parentAntiRigid = (generalStereotype == "role" || generalStereotype == "phase" || generalStereotype == "roleMixin");
+            bool childRigid = (specificStereotype == "kind" || specificStereotype == "subkind" || specificStereotype == "category");
+
+            // 1. Regra da Rigidez
+            if (parentAntiRigid && childRigid) {
+                valid = false;
+                errorMsg = "Regra da Rigidez violada: Tipo Antirrígido (" + generalStereotype + ") não pode generalizar Tipo Rígido (" + specificStereotype + ").";
             }
-        }
-        // --- Padrão Role ---
-        else if (specificStereotype == "role") {
-            // Regra comum: Role não deve ser rígido como disjoint (contextual, mas vamos assumir a regra do trabalho)
-            if (gen.isDisjoint) {
-                outputSyntheticData << "   [ERRO SEMÂNTICO] Padrão Role: Genset não deve ser 'disjoint'.\n";
-                // Coerção
-                gen.isDisjoint = false; 
-                outputSyntheticData << "   [CORREÇÃO/COERÇÃO] Propriedade 'disjoint' removida do Genset.\n";
-            } else {
-                 outputSyntheticData << "   [OK] Padrão Role validado.\n";
+            else {
+                // 2. Validação por Tabela de Compatibilidade
+                if (generalStereotype == "kind") {
+                    if (specificStereotype != "subkind" && specificStereotype != "phase" && specificStereotype != "role") {
+                        valid = false;
+                        errorMsg = "Kind só pode ser especializado por Subkind, Phase ou Role.";
+                    }
+                }
+                else if (generalStereotype == "subkind") {
+                    if (specificStereotype != "subkind" && specificStereotype != "phase" && specificStereotype != "role") {
+                        valid = false;
+                        errorMsg = "Subkind só pode ser especializado por Subkind, Phase ou Role.";
+                    }
+                }
+                else if (generalStereotype == "phase") {
+                    if (specificStereotype != "phase" && specificStereotype != "role") {
+                        valid = false;
+                        errorMsg = "Phase só pode ser especializada por Phase ou Role.";
+                    }
+                }
+                else if (generalStereotype == "role") {
+                    if (specificStereotype != "role") {
+                        valid = false;
+                        errorMsg = "Role só pode ser especializado por Role.";
+                    }
+                }
+                else if (generalStereotype == "category") {
+                    if (specificStereotype != "kind" && specificStereotype != "subkind" && specificStereotype != "category") {
+                        valid = false;
+                        errorMsg = "Category só pode ser especializada por Kind, Subkind ou Category.";
+                    }
+                }
+                else if (generalStereotype == "roleMixin") {
+                    if (specificStereotype != "role" && specificStereotype != "roleMixin") {
+                        valid = false;
+                        errorMsg = "RoleMixin só pode ser especializado por Role ou RoleMixin.";
+                    }
+                }
+                else if (generalStereotype == "mixin") {
+                     // Mixin pode ser especializado por Mixin, Category, RoleMixin e Sortais (Kind, Subkind, Phase, Role)
+                     if (specificStereotype != "mixin" && specificStereotype != "category" && specificStereotype != "roleMixin" &&
+                         specificStereotype != "kind" && specificStereotype != "subkind" && specificStereotype != "phase" && specificStereotype != "role") {
+                        valid = false;
+                        errorMsg = "Mixin só pode ser especializado por outros Mixins ou Sortais.";
+                     }
+                }
             }
-        }
-        // --- Padrão Phase ---
-        else if (specificStereotype == "phase") {
-             // Regra: "disjoint is mandatory for phases"
-             if (!gen.isDisjoint) {
-                 outputSyntheticData << "   [ERRO SEMÂNTICO] Padrão Phase: Genset deve ser obrigatoriamente 'disjoint'.\n";
-                 // Coerção
-                 gen.isDisjoint = true;
-                 outputSyntheticData << "   [CORREÇÃO/COERÇÃO] Propriedade 'disjoint' adicionada ao Genset.\n";
-             } else {
-                 outputSyntheticData << "   [OK] Padrão Phase validado (é disjoint).\n";
-             }
+
+            if (valid) {
+                outputSyntheticData << "   [RESULTADO] Generalização VÁLIDA.\n";
+            } else {
+                outputSyntheticData << "   [ERRO] " << errorMsg << "\n";
+            }
         }
     }
 
-    // 2. Validar Padrão Relator
+    // -- Validação de Padrões Baseados em Relação --
+    
+    // 4. Padrão Relator
     outputSyntheticData << "\n>> Verificando Padrão Relator...\n";
     bool relatorFound = false;
     for (auto const& [className, stereotype] : classStereotypes) {
         if (stereotype == "relator") {
             relatorFound = true;
+            outputSyntheticData << "   ---------------------------------------------------\n";
             outputSyntheticData << "   Relator encontrado: " << className << "\n";
             
             // Conta mediações conectadas a este relator
@@ -211,9 +257,10 @@ void performSemanticAnalysis() {
                 }
             }
 
+            outputSyntheticData << "   Mediações detectadas: " << mediationCount << "\n";
+
             if (mediationCount >= 2) {
-                outputSyntheticData << "   [OK] Possui " << mediationCount << " mediações.\n";
-                // Tenta encontrar relação material entre os mediados (opcional mas recomendado no padrão)
+                // Verifica relação material derivada
                 bool materialFound = false;
                 for (const auto& rel : relationsList) {
                      if (rel.stereotype == "material") {
@@ -227,45 +274,61 @@ void performSemanticAnalysis() {
                 }
                 
                 if (materialFound) {
-                    outputSyntheticData << "   [OK] Relação Material derivada encontrada entre os mediados.\n";
+                    outputSyntheticData << "   [RESULTADO] Padrão Relator COMPLETO (com Material derivada).\n";
                 } else {
-                    outputSyntheticData << "   [AVISO] Padrão Relator incompleto: Relação 'material' explícita entre os papeis não encontrada.\n";
+                    outputSyntheticData << "   [AVISO] Padrão Relator PARCIAL: Relação 'material' explícita não encontrada entre os papeis.\n";
                 }
+
             } else {
                 outputSyntheticData << "   [ERRO] Relator deve mediar pelo menos 2 entidades (encontradas: " << mediationCount << ").\n";
             }
         }
     }
-    if (!relatorFound) outputSyntheticData << "   Nenhum Relator encontrado.\n";
+    if (!relatorFound) outputSyntheticData << "   [INFO] Nenhum Relator encontrado na ontologia.\n";
 
-    // 3. Validar Padrão Mode
+
+    // 5. Padrão Mode
     outputSyntheticData << "\n>> Verificando Padrão Mode...\n";
     bool modeFound = false;
+    
     for (auto const& [className, stereotype] : classStereotypes) {
         if (stereotype == "mode") {
             modeFound = true;
-            outputSyntheticData << "   Mode encontrado: " << className << "\n";
+            outputSyntheticData << "   ------------------------------------------------------\n";
+            outputSyntheticData << "   [ANÁLISE] Classe: " << className << " | Estereótipo: mode\n";
+            
             bool hasCharacterization = false;
             bool hasExternalDep = false;
 
+            // Verifica relações conectadas à classe Mode
             for (const auto& rel : relationsList) {
-                // Mode normalmente é a origem da characterization (caracteriza algo) ou destino (algo tem um modo)
                 if (rel.sourceClass == className || rel.targetClass == className) {
                     if (rel.stereotype == "characterization") hasCharacterization = true;
-                    // Mode depende externamente de outra coisa (geralmente o portador ou outro)
                     if (rel.stereotype == "externalDependence") hasExternalDep = true;
                 }
             }
 
+            // Relatório Explícito de Ausência/Presença
+            outputSyntheticData << "   [VERIFICAÇÃO DE DEPENDÊNCIAS]\n";
+            outputSyntheticData << "      1. Relação 'characterization':   " 
+                      << (hasCharacterization ? "[OK] Presente" : "[FALHA] AUSENTE") << "\n";
+            
+            outputSyntheticData << "      2. Relação 'externalDependence': " 
+                      << (hasExternalDep ? "[OK] Presente" : "[FALHA] AUSENTE") << "\n";
+
             if (hasCharacterization && hasExternalDep) {
-                outputSyntheticData << "   [OK] Padrão Mode completo (Characterization + ExternalDependence).\n";
+                outputSyntheticData << "   [RESULTADO FINAL] Padrão Mode VÁLIDO para '" << className << "'.\n";
             } else {
-                if (!hasCharacterization) outputSyntheticData << "   [ERRO] Falta relação de 'characterization'.\n";
-                if (!hasExternalDep) outputSyntheticData << "   [ERRO] Falta relação de 'externalDependence'.\n";
+                outputSyntheticData << "   [RESULTADO FINAL] Padrão Mode INVÁLIDO para '" << className << "'.\n";
             }
         }
     }
-    if (!modeFound) outputSyntheticData << "   Nenhum Mode encontrado.\n";
+    
+    if (!modeFound) {
+        outputSyntheticData << "   ------------------------------------------------------\n";
+        outputSyntheticData << "   [INFO] Nenhuma classe com estereótipo 'mode' foi declarada ou encontrada.\n";
+        outputSyntheticData << "   ------------------------------------------------------\n";
+    }
 
-    outputSyntheticData << "========================================\n\n";
+    outputSyntheticData << "\n======================================================\n\n";
 }

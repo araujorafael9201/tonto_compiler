@@ -14,8 +14,8 @@ using namespace std;
 
 delim [ \t]
 whitespaces {delim}+
-/* Adicionado 'relator' ao final da lista de estereótipos */
-class_estereotype event|situation|pry|mixin|phaseMixin|roleMixin|historicalRoleMixin|kind|collective|quantity|quality|mode|intrisicMode|extrinsicMode|subkind|phase|role|historicalRole|relator
+/* Adicionado 'relator' e 'category' ao final da lista de estereótipos de classe */
+class_estereotype event|situation|pry|mixin|phaseMixin|roleMixin|historicalRoleMixin|kind|collective|quantity|quality|mode|intrisicMode|extrinsicMode|subkind|phase|role|historicalRole|relator|category
 relation_estereotype material|derivation|comparative|mediation|characterization|externalDependence|componentOf|memberOf|subCollectionOf|subQualityOf|instantiation|termination|participational|participation|historicalDependence|creation|manifestation|bringsAbout|triggers|composition|aggregation|inherence|value|formal|constitution
 native_data_type number|string|boolean|date|time|datetime
 meta_attr ordered|const|derived|subsets|redefines
