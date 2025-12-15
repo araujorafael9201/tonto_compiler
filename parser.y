@@ -150,9 +150,12 @@ cardinalityEnding : TP ASTERISK
                   | ;
 
 // Ação vazia antes das alternativas para garantir reset das flags
-generalization : { resetGenFlags(); } inlineGeneralization
-               | { resetGenFlags(); } blockGeneralization
+generalization : { resetGenFlags(); } generalizationOptions
                ;
+
+generalizationOptions : inlineGeneralization
+                      | blockGeneralization
+                      ;
 
 inlineGeneralization  : generalizationHeader WHERE { tempSpecificsList.clear(); } generalizationSpecifics SPECIALIZES CLASS_ID 
                       {
