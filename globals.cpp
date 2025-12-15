@@ -1,6 +1,7 @@
 #include "globals.h"
 #include <sstream>
 #include <iostream>
+#include <algorithm> // Para std::find
 
 std::string currentLexeme = "";
 std::string currentParsingClass = "";
@@ -11,6 +12,7 @@ std::vector<std::string> newDataTypeNames;
 std::vector<std::string> enumNames;
 std::vector<Generalization> generalizationsList;
 std::vector<Relation> relationsList;
+std::map<std::string, std::string> classStereotypes;
 
 int currentColumn = 1;
 int lastTokenColumn = 1;
@@ -66,6 +68,7 @@ void resetGlobals() {
     enumNames.clear();
     generalizationsList.clear();
     relationsList.clear();
+    classStereotypes.clear();
 
     currentColumn = 1;
     lastTokenColumn = 1;
@@ -107,7 +110,9 @@ void flushSyntacticLog()
         for (size_t i = 0; i < gen.specificClasses.size(); i++) {
             outputSyntheticData << gen.specificClasses[i] << (i < gen.specificClasses.size() - 1 ? ", " : "");
         }
-        outputSyntheticData << " | Tipo: " << (gen.isInline ? "Inline" : "Bloco") << "\n";
+        outputSyntheticData << " | Tipo: " << (gen.isInline ? "Inline" : "Bloco")
+                            << " | Disjoint: " << (gen.isDisjoint ? "Sim" : "Não")
+                            << " | Complete: " << (gen.isComplete ? "Sim" : "Não") << "\n";
     }
 
     outputSyntheticData << "\n6. RELAÇÕES (" << relationsList.size() << "):\n";
@@ -132,3 +137,198 @@ void flushSyntacticLog()
                         << "Números: " << numberCount << '\n';
 }
 
+void performSemanticAnalysis() {
+    if (!outputSyntheticData.is_open()) return;
+
+    outputSyntheticData << "\n=== RELATÓRIO DE ANÁLISE SEMÂNTICA ===\n";
+    
+    // -- Validação de Padrões Baseados em Generalização --
+    outputSyntheticData << "\n>> Verificando Padrões de Generalização (Subkind, Role, Phase, RoleMixin)...\n";
+    
+    if (generalizationsList.empty()) {
+        outputSyntheticData << "   [INFO] Nenhuma generalização encontrada para análise.\n";
+    }
+
+    for (auto& gen : generalizationsList) {
+        if (gen.specificClasses.empty()) continue;
+
+        std::string generalStereotype = classStereotypes[gen.generalClass];
+        
+        for (const auto& specificClass : gen.specificClasses) {
+            std::string specificStereotype = classStereotypes[specificClass];
+
+            outputSyntheticData << "   ---------------------------------------------------\n";
+            outputSyntheticData << "   Genset: '" << gen.name << "'\n";
+            outputSyntheticData << "   Estrutura: " << specificClass << " (" << specificStereotype << ") -> " 
+                      << gen.generalClass << " (" << generalStereotype << ")\n";
+
+            bool valid = true;
+            std::string errorMsg = "";
+
+            // Definição de grupos para verificação
+            bool parentAntiRigid = (generalStereotype == "role" || generalStereotype == "phase" || generalStereotype == "roleMixin");
+            bool childRigid = (specificStereotype == "kind" || specificStereotype == "subkind" || specificStereotype == "category");
+
+            // 1. Regra da Rigidez
+            if (parentAntiRigid && childRigid) {
+                valid = false;
+                errorMsg = "Regra da Rigidez violada: Tipo Antirrígido (" + generalStereotype + ") não pode generalizar Tipo Rígido (" + specificStereotype + ").";
+            }
+            else {
+                // 2. Validação por Tabela de Compatibilidade
+                if (generalStereotype == "kind") {
+                    if (specificStereotype != "subkind" && specificStereotype != "phase" && specificStereotype != "role") {
+                        valid = false;
+                        errorMsg = "Kind só pode ser especializado por Subkind, Phase ou Role.";
+                    }
+                }
+                else if (generalStereotype == "subkind") {
+                    if (specificStereotype != "subkind" && specificStereotype != "phase" && specificStereotype != "role") {
+                        valid = false;
+                        errorMsg = "Subkind só pode ser especializado por Subkind, Phase ou Role.";
+                    }
+                }
+                else if (generalStereotype == "phase") {
+                    if (specificStereotype != "phase" && specificStereotype != "role") {
+                        valid = false;
+                        errorMsg = "Phase só pode ser especializada por Phase ou Role.";
+                    }
+                }
+                else if (generalStereotype == "role") {
+                    if (specificStereotype != "role") {
+                        valid = false;
+                        errorMsg = "Role só pode ser especializado por Role.";
+                    }
+                }
+                else if (generalStereotype == "category") {
+                    if (specificStereotype != "kind" && specificStereotype != "subkind" && specificStereotype != "category") {
+                        valid = false;
+                        errorMsg = "Category só pode ser especializada por Kind, Subkind ou Category.";
+                    }
+                }
+                else if (generalStereotype == "roleMixin") {
+                    if (specificStereotype != "role" && specificStereotype != "roleMixin") {
+                        valid = false;
+                        errorMsg = "RoleMixin só pode ser especializado por Role ou RoleMixin.";
+                    }
+                }
+                else if (generalStereotype == "mixin") {
+                     // Mixin pode ser especializado por Mixin, Category, RoleMixin e Sortais (Kind, Subkind, Phase, Role)
+                     if (specificStereotype != "mixin" && specificStereotype != "category" && specificStereotype != "roleMixin" &&
+                         specificStereotype != "kind" && specificStereotype != "subkind" && specificStereotype != "phase" && specificStereotype != "role") {
+                        valid = false;
+                        errorMsg = "Mixin só pode ser especializado por outros Mixins ou Sortais.";
+                     }
+                }
+            }
+
+            if (valid) {
+                outputSyntheticData << "   [RESULTADO] Generalização VÁLIDA.\n";
+            } else {
+                outputSyntheticData << "   [ERRO] " << errorMsg << "\n";
+            }
+        }
+    }
+
+    // -- Validação de Padrões Baseados em Relação --
+    
+    // 4. Padrão Relator
+    outputSyntheticData << "\n>> Verificando Padrão Relator...\n";
+    bool relatorFound = false;
+    for (auto const& [className, stereotype] : classStereotypes) {
+        if (stereotype == "relator") {
+            relatorFound = true;
+            outputSyntheticData << "   ---------------------------------------------------\n";
+            outputSyntheticData << "   Relator encontrado: " << className << "\n";
+            
+            // Conta mediações conectadas a este relator
+            int mediationCount = 0;
+            std::vector<std::string> mediatedClasses;
+            
+            for (const auto& rel : relationsList) {
+                if (rel.stereotype == "mediation") {
+                    if (rel.sourceClass == className) {
+                        mediationCount++;
+                        mediatedClasses.push_back(rel.targetClass);
+                    } else if (rel.targetClass == className) {
+                        mediationCount++;
+                        mediatedClasses.push_back(rel.sourceClass);
+                    }
+                }
+            }
+
+            outputSyntheticData << "   Mediações detectadas: " << mediationCount << "\n";
+
+            if (mediationCount >= 2) {
+                // Verifica relação material derivada
+                bool materialFound = false;
+                for (const auto& rel : relationsList) {
+                     if (rel.stereotype == "material") {
+                         bool srcIn = std::find(mediatedClasses.begin(), mediatedClasses.end(), rel.sourceClass) != mediatedClasses.end();
+                         bool tgtIn = std::find(mediatedClasses.begin(), mediatedClasses.end(), rel.targetClass) != mediatedClasses.end();
+                         if (srcIn && tgtIn) {
+                             materialFound = true;
+                             break;
+                         }
+                     }
+                }
+                
+                if (materialFound) {
+                    outputSyntheticData << "   [RESULTADO] Padrão Relator COMPLETO (com Material derivada).\n";
+                } else {
+                    outputSyntheticData << "   [AVISO] Padrão Relator PARCIAL: Relação 'material' explícita não encontrada entre os papeis.\n";
+                }
+
+            } else {
+                outputSyntheticData << "   [ERRO] Relator deve mediar pelo menos 2 entidades (encontradas: " << mediationCount << ").\n";
+            }
+        }
+    }
+    if (!relatorFound) outputSyntheticData << "   [INFO] Nenhum Relator encontrado na ontologia.\n";
+
+
+    // 5. Padrão Mode
+    outputSyntheticData << "\n>> Verificando Padrão Mode...\n";
+    bool modeFound = false;
+    
+    for (auto const& [className, stereotype] : classStereotypes) {
+        if (stereotype == "mode") {
+            modeFound = true;
+            outputSyntheticData << "   ------------------------------------------------------\n";
+            outputSyntheticData << "   [ANÁLISE] Classe: " << className << " | Estereótipo: mode\n";
+            
+            bool hasCharacterization = false;
+            bool hasExternalDep = false;
+
+            // Verifica relações conectadas à classe Mode
+            for (const auto& rel : relationsList) {
+                if (rel.sourceClass == className || rel.targetClass == className) {
+                    if (rel.stereotype == "characterization") hasCharacterization = true;
+                    if (rel.stereotype == "externalDependence") hasExternalDep = true;
+                }
+            }
+
+            // Relatório Explícito de Ausência/Presença
+            outputSyntheticData << "   [VERIFICAÇÃO DE DEPENDÊNCIAS]\n";
+            outputSyntheticData << "      1. Relação 'characterization':   " 
+                      << (hasCharacterization ? "[OK] Presente" : "[FALHA] AUSENTE") << "\n";
+            
+            outputSyntheticData << "      2. Relação 'externalDependence': " 
+                      << (hasExternalDep ? "[OK] Presente" : "[FALHA] AUSENTE") << "\n";
+
+            if (hasCharacterization && hasExternalDep) {
+                outputSyntheticData << "   [RESULTADO FINAL] Padrão Mode VÁLIDO para '" << className << "'.\n";
+            } else {
+                outputSyntheticData << "   [RESULTADO FINAL] Padrão Mode INVÁLIDO para '" << className << "'.\n";
+            }
+        }
+    }
+    
+    if (!modeFound) {
+        outputSyntheticData << "   ------------------------------------------------------\n";
+        outputSyntheticData << "   [INFO] Nenhuma classe com estereótipo 'mode' foi declarada ou encontrada.\n";
+        outputSyntheticData << "   ------------------------------------------------------\n";
+    }
+
+    outputSyntheticData << "\n======================================================\n\n";
+}
