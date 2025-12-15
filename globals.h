@@ -7,6 +7,19 @@
 extern std::string currentLexeme; // Usada para passar o texto do Lexer para o Parser de forma simples
 extern std::string currentParsingClass; // Usada para saber a classe atual do bloco que está sendo analisado (para relações internas)
 
+enum class Stereotype {
+    Kind,
+    Subkind,
+    Phase,
+    Role,
+    Category,
+    RoleMixin,
+    Mixin,
+    Other
+};
+
+Stereotype getStereotypeEnum(const std::string& s);
+
 // Armazenamento de Dados Sintáticos 
 struct Generalization {
     std::string name;

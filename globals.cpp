@@ -32,6 +32,17 @@ unsigned long instanceIdCount = 0;
 unsigned long newDataTypeIdCount = 0;
 unsigned long numberCount = 0;
 
+Stereotype getStereotypeEnum(const std::string& s) {
+    if (s == "kind") return Stereotype::Kind;
+    if (s == "subkind") return Stereotype::Subkind;
+    if (s == "phase") return Stereotype::Phase;
+    if (s == "role") return Stereotype::Role;
+    if (s == "category") return Stereotype::Category;
+    if (s == "roleMixin") return Stereotype::RoleMixin;
+    if (s == "mixin") return Stereotype::Mixin;
+    return Stereotype::Other;
+}
+
 // Funções globais
 void logAnalyticData(int token, const std::string& type,
                      const char* lexeme, int line, int column)
@@ -165,9 +176,12 @@ void performSemanticAnalysis() {
             bool valid = true;
             std::string errorMsg = "";
 
+            Stereotype genType = getStereotypeEnum(generalStereotype);
+            Stereotype specType = getStereotypeEnum(specificStereotype);
+
             // Definição de grupos para verificação
-            bool parentAntiRigid = (generalStereotype == "role" || generalStereotype == "phase" || generalStereotype == "roleMixin");
-            bool childRigid = (specificStereotype == "kind" || specificStereotype == "subkind" || specificStereotype == "category");
+            bool parentAntiRigid = (genType == Stereotype::Role || genType == Stereotype::Phase || genType == Stereotype::RoleMixin);
+            bool childRigid = (specType == Stereotype::Kind || specType == Stereotype::Subkind || specType == Stereotype::Category);
 
             // 1. Regra da Rigidez
             if (parentAntiRigid && childRigid) {
@@ -176,49 +190,54 @@ void performSemanticAnalysis() {
             }
             else {
                 // 2. Validação por Tabela de Compatibilidade
-                if (generalStereotype == "kind") {
-                    if (specificStereotype != "subkind" && specificStereotype != "phase" && specificStereotype != "role") {
-                        valid = false;
-                        errorMsg = "Kind só pode ser especializado por Subkind, Phase ou Role.";
-                    }
-                }
-                else if (generalStereotype == "subkind") {
-                    if (specificStereotype != "subkind" && specificStereotype != "phase" && specificStereotype != "role") {
-                        valid = false;
-                        errorMsg = "Subkind só pode ser especializado por Subkind, Phase ou Role.";
-                    }
-                }
-                else if (generalStereotype == "phase") {
-                    if (specificStereotype != "phase" && specificStereotype != "role") {
-                        valid = false;
-                        errorMsg = "Phase só pode ser especializada por Phase ou Role.";
-                    }
-                }
-                else if (generalStereotype == "role") {
-                    if (specificStereotype != "role") {
-                        valid = false;
-                        errorMsg = "Role só pode ser especializado por Role.";
-                    }
-                }
-                else if (generalStereotype == "category") {
-                    if (specificStereotype != "kind" && specificStereotype != "subkind" && specificStereotype != "category") {
-                        valid = false;
-                        errorMsg = "Category só pode ser especializada por Kind, Subkind ou Category.";
-                    }
-                }
-                else if (generalStereotype == "roleMixin") {
-                    if (specificStereotype != "role" && specificStereotype != "roleMixin") {
-                        valid = false;
-                        errorMsg = "RoleMixin só pode ser especializado por Role ou RoleMixin.";
-                    }
-                }
-                else if (generalStereotype == "mixin") {
-                     // Mixin pode ser especializado por Mixin, Category, RoleMixin e Sortais (Kind, Subkind, Phase, Role)
-                     if (specificStereotype != "mixin" && specificStereotype != "category" && specificStereotype != "roleMixin" &&
-                         specificStereotype != "kind" && specificStereotype != "subkind" && specificStereotype != "phase" && specificStereotype != "role") {
-                        valid = false;
-                        errorMsg = "Mixin só pode ser especializado por outros Mixins ou Sortais.";
-                     }
+                switch (genType) {
+                    case Stereotype::Kind:
+                        if (specType != Stereotype::Subkind && specType != Stereotype::Phase && specType != Stereotype::Role) {
+                            valid = false;
+                            errorMsg = "Kind só pode ser especializado por Subkind, Phase ou Role.";
+                        }
+                        break;
+                    case Stereotype::Subkind:
+                        if (specType != Stereotype::Subkind && specType != Stereotype::Phase && specType != Stereotype::Role) {
+                            valid = false;
+                            errorMsg = "Subkind só pode ser especializado por Subkind, Phase ou Role.";
+                        }
+                        break;
+                    case Stereotype::Phase:
+                        if (specType != Stereotype::Phase && specType != Stereotype::Role) {
+                            valid = false;
+                            errorMsg = "Phase só pode ser especializada por Phase ou Role.";
+                        }
+                        break;
+                    case Stereotype::Role:
+                        if (specType != Stereotype::Role) {
+                            valid = false;
+                            errorMsg = "Role só pode ser especializado por Role.";
+                        }
+                        break;
+                    case Stereotype::Category:
+                        if (specType != Stereotype::Kind && specType != Stereotype::Subkind && specType != Stereotype::Category) {
+                            valid = false;
+                            errorMsg = "Category só pode ser especializada por Kind, Subkind ou Category.";
+                        }
+                        break;
+                    case Stereotype::RoleMixin:
+                        if (specType != Stereotype::Role && specType != Stereotype::RoleMixin) {
+                            valid = false;
+                            errorMsg = "RoleMixin só pode ser especializado por Role ou RoleMixin.";
+                        }
+                        break;
+                    case Stereotype::Mixin:
+                        // Mixin pode ser especializado por Mixin, Category, RoleMixin e Sortais (Kind, Subkind, Phase, Role)
+                        if (specType != Stereotype::Mixin && specType != Stereotype::Category && specType != Stereotype::RoleMixin &&
+                            specType != Stereotype::Kind && specType != Stereotype::Subkind && specType != Stereotype::Phase && specType != Stereotype::Role) {
+                            valid = false;
+                            errorMsg = "Mixin só pode ser especializado por outros Mixins ou Sortais.";
+                        }
+                        break;
+                    default:
+                        // Outros casos ou desconhecidos não são validados estritamente aqui
+                        break;
                 }
             }
 
