@@ -42,9 +42,15 @@ void resetGenFlags() {
 
 %%
 
-start : package body
+start : import package body
       | error { yyerrok; } body
       ;
+
+import : IMPORT CLASS_ID import
+       |
+       ;
+
+package : PACKAGE CLASS_ID body
 
 body  : body statement
       |
@@ -84,7 +90,7 @@ classHeader : CLASS_ESTEREOTYPE { tempClassStereotype = currentLexeme; } CLASS_I
             ;
 
 classBody : L_BRACE attributes internalRelations R_BRACE
-          | SPECIALIZES CLASS_ID
+          | SPECIALIZES classes
           | error R_BRACE { yyerrok; }
           |
           ;
@@ -157,7 +163,11 @@ generalizationOptions : inlineGeneralization
                       | blockGeneralization
                       ;
 
-inlineGeneralization  : generalizationHeader WHERE { tempSpecificsList.clear(); } generalizationSpecifics SPECIALIZES CLASS_ID 
+classes : CLASS_ID COMMA classes
+        | CLASS_ID
+        ;
+
+inlineGeneralization  : generalizationHeader WHERE { tempSpecificsList.clear(); } generalizationSpecifics SPECIALIZES classes 
                       {
                           Generalization info;
                           info.name = tempGenSetName;
