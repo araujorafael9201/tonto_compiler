@@ -1,6 +1,6 @@
 # Tonto Compiler 
 
-A compiler for the **Tonto** language, developed as a college project for the Compilers course. This project currently implements lexical analysis using **Flex** (Fast Lexical Analyzer) and syntactic anaysis using **Bison**.
+A compiler for the **Tonto** language, developed as a college project for the Compilers course. This project currently implements lexical analysis using **Flex** (Fast Lexical Analyzer), syntactic analysis using **Bison** and semantic analysis.
 
 ## 👥 Authors
 
@@ -11,7 +11,7 @@ A compiler for the **Tonto** language, developed as a college project for the Co
 
 **Tonto** is a domain-specific language designed for ontology modeling, supporting stereotypes from OntoUML and UFO (Unified Foundational Ontology).
 
-The **lexical analyzer** recognizes and categorizes tokens specific to ontological modeling, including:
+The **LEXICAL ANALYZER** recognizes and categorizes tokens specific to ontological modeling, including:
 
 - **Reserved Keywords**: `genset`, `disjoint`, `complete`, `general`, `specifics`, `where`, `package`, `import`, `functional-complexes`, `specializes`, `enum`, `relation`, `datatype`
 - **Class Stereotypes**: `event`, `situation`, `kind`, `collective`, `quality`, `mode`, `subkind`, `phase`, `role`, `mixin`, etc.
@@ -21,7 +21,9 @@ The **lexical analyzer** recognizes and categorizes tokens specific to ontologic
 - **Special Symbols**: `{`, `}`, `(`, `)`, `[`, `]`, `..`, `<>--`, `--<>`, `*`, `@`, `:`, `,` 
 - **Identifiers**: Classes, relations, instances, attributes (same rule for identifying relationships) and custom data types
 
-The **syntactic analyzer** recognizes the following patterns:
+
+
+The **SYNCTATIC ANALYZER** recognizes the following patterns:
 
 - **Package Declarations**
 ```
@@ -73,11 +75,103 @@ kind University {
 ```
 
 
+
+The **SEMANTIC ANALYZER** implements validation of the following design patterns:
+
+- **Subkind Pattern**
+```
+package Subkind_Pattern
+
+kind ClassName
+subkind SubclassName1 specializes ClassName
+subkinf SubclassName2 specializes ClassName
+
+disjoint complete genset kind_Subkind_Genset_Name {
+    general ClassName
+    specifics SubclassName1, SubclassName2
+}
+```
+- **Role Pattern**
+```
+package Role_Pattern
+
+kind ClassName
+role Role_Name1 specializes ClassName
+role Role_Name2 specializes ClassName
+
+complete genset Class_Role_Genset_Name {
+    general ClassName
+    specifics Role_Name1, Role_Name2
+}
+```
+- **Phase Pattern**
+```
+package Phase_Pattern
+
+kind ClassName
+phase Phase_Name1 specializes ClassName
+phase Phase_Name2 specializes ClassName
+phase Phase_NameN specializes ClassName
+
+disjoint complete genset Class_Phase_Genset_Name {
+    general ClassName
+    specifics Phase_Name1, Phase_Name2, Phase_NameN
+}
+```
+- **Relator Pattern**
+```
+package Relator_Pattern
+
+kind ClassName1
+kind ClassName2
+
+role Role_Name1 specializes ClassName1
+role Role_Name2 specializes ClassName2
+
+relator Relator_Name {
+    @mediation [1..*] -- [1..*] Role_Name1
+    @mediation [1..*] -- [1..*] Role_Name2
+}
+
+@material relation Role_Name1 [1..*] -- relationName -- [1..*] Role_Name2
+```
+- **Mode Pattern**
+```
+package Mode_Pattern
+
+kind ClassName1
+kind ClassName2
+
+mode Mode_Name1 {
+    @characterization [1..*] -- [1] ClassName1
+    @externalDependence [1..*] -- [1..*] ClassName2
+}
+
+
+```
+- **RoleMixin Pattern**
+```
+package RoleMixin_Pattern
+
+kind ClassName1
+kind ClassName2
+
+roleMixin RoleMixin_Name
+
+role Role_Name1 specializes ClassName1, RoleMixin_Name
+role Role_Name2 specializes ClassName2, RoleMixin_Name
+
+disjoint complete genset RoleMixin_Genset_Name {
+    general RoleMixin_Name
+    specifics Role_Name1, Role_Name2
+}
+```
+
 ## 🚀 Current Status
 
 ✅ **Completed**: Lexical Analysis  
 ✅ **Completed**: Syntactic Analysis (Parser)  
-🔜 **Future**: Semantic Analysis
+✅ **Completed**: Semantic Analysis
 
 ## 🛠️ Technologies Used
 
@@ -92,7 +186,7 @@ kind University {
 ```
 tonto_compiler/
 ├── lexer.l              # Flex lexical specification
-├── parser.y             # Bison syntactic specification
+├── parser.y             # Bison syntactic specification and main (input reading)
 ├── globals.h            # Definitions of variables and global methods
 ├── globals.cpp          # Implementation of variables and global methods
 ├── CMakeLists.txt       # CMake build configuration
@@ -149,7 +243,7 @@ cmake -DCMAKE_BUILD_TYPE=Build ..
 make
 ```
 
-## ▶️ Running the Lexical Analyzer
+## ▶️ Running the Program
 
 After building and add one or more `.tonto` file on project root, run the analyzer:
 
@@ -167,17 +261,17 @@ The program generates two output files in the Build directory, one for each inpu
 
 `(* is the name of the input file.)`
 - *_analytic.log: Detailed token-by-token analysis
-- *_synthetic.log: Summary statistics about lexical and syntactic analysis
+- *_synthetic.log: Summary statistics about lexical, syntactic and semantic analysis
 
 
 ```
 # *_analytic.log
 
-token: 259 | lexeme: package | type: Palavra Reservada | line: 1 | column: 1
-token: 274 | lexeme: MyPackage | type: Identificador de classe | line: 1 | column: 9
-token: 277 | lexeme: kind | type: Estereótipo de classe | line: 3 | column: 1
-token: 274 | lexeme: Person | type: Identificador de classe | line: 3 | column: 6
-token: 282 | lexeme: { | type: Símbolo Especial | line: 3 | column: 13
+token: 269 | lexeme: import | type: Palavra Reservada | line: 1 | column: 1
+token: 274 | lexeme: Pessoa | type: Identificador de classe | line: 1 | column: 8
+token: 269 | lexeme: import | type: Palavra Reservada | line: 2 | column: 1
+token: 274 | lexeme: Empresa | type: Identificador de classe | line: 2 | column: 8
+token: 259 | lexeme: package | type: Palavra Reservada | line: 4 | column: 1
 .
 .
 .
@@ -187,38 +281,58 @@ token: 282 | lexeme: { | type: Símbolo Especial | line: 3 | column: 13
 === RELATÓRIO SINTÁTICO ===
 
 1. PACOTES (1):
-   - MyPackage
+   - Cliente
 
 2. CLASSES (3):
-   - Person
-   - Child
-   - University
+   - Cliente
+   - ClienteIndividual
+   - ClienteEmpresarial
 
-3. NOVOS TIPOS DE DADOS (1):
-   - AddressDataType
+3. NOVOS TIPOS DE DADOS (0):
 
-4. ENUMS (1):
-   - EyeColor
+4. ENUMS (0):
 
-5. GENERALIZAÇÕES (2):
-   - Genset: PersonAgeGroup | Mãe: Person | Filhas: Child, Adult | Tipo: Inline
-   - Genset: PersonAgeGroup | Mãe: Person | Filhas: Child, Adult | Tipo: Bloco
+5. GENERALIZAÇÕES (1):
+   - Genset: Tipos_de_Clientes | Mãe: Cliente | Filhas: ClienteIndividual, ClienteEmpresarial | Tipo: Bloco | Disjoint: Sim | Complete: Sim
 
-6. RELAÇÕES (1):
-   - Estereótipo: mediation | Origem: EmploymentContract | Destino: Employee | Tipo: Externa
+6. RELAÇÕES (0):
 
 === ESTATÍSTICAS LÉXICAS ===
-Palavras Reservadas: 13
-Tipos de dados nativos: 5
-Meta-atributos: 1
-Símbolos especiais: 36
+Palavras Reservadas: 10
+Tipos de dados nativos: 0
+Meta-atributos: 0
+Símbolos especiais: 5
 Estereótipos de classe: 3
-Estereótipos de relação: 2
-Identificadores de classe: 17
-Identificadores de relação: 5
-Identificadores de instância: 3
-Identificadores de novo tipo de dado: 1
-Números: 4
+Estereótipos de relação: 0
+Identificadores de classe: 14
+Identificadores de relação: 0
+Identificadores de instância: 0
+Identificadores de novo tipo de dado: 0
+Números: 0
+
+=== RELATÓRIO DE ANÁLISE SEMÂNTICA ===
+
+>> Verificando Padrões de Generalização (Subkind, Role, Phase, RoleMixin)...
+   ---------------------------------------------------
+   Genset: 'Tipos_de_Clientes'
+   Estrutura: ClienteIndividual (role) -> Cliente (roleMixin)
+   [RESULTADO] Generalização VÁLIDA.
+   ---------------------------------------------------
+   Genset: 'Tipos_de_Clientes'
+   Estrutura: ClienteEmpresarial (role) -> Cliente (roleMixin)
+   [RESULTADO] Generalização VÁLIDA.
+
+>> Verificando Padrão Relator...
+   [INFO] Nenhum Relator encontrado na ontologia.
+
+>> Verificando Padrão Mode...
+   ------------------------------------------------------
+   [INFO] Nenhuma classe com estereótipo 'mode' foi declarada ou encontrada.
+   ------------------------------------------------------
+
+======================================================
+
+
 
 ```
 
@@ -226,8 +340,10 @@ Números: 4
 
 When errors are detected, the program reports them in two ways:
 
-* **Terminal Output**: An error message is immediately printed to the console, indicating the line and column where the error (lexical or syntactic) occurred.
+* **Terminal Output**: An error message is immediately printed to the console, indicating the line and column where the error occurred.
 * **`analytic.log` File**: The error messages for **lexical errors** are also recorded in the analytical log file for later review.
+
+
 
 Example:
 
@@ -239,13 +355,10 @@ syntax error, unexpected invalid token, expecting : ("-" at line 4, column 2)
 syntax error, unexpected relation name ("age" at line 6, column 3)
 Logs: ../teste_analytic.log, ../teste_synthetic.log
 ```
+Furthermore, errors are corrected through **coercion**.
 
 
 
-## 🐛 Known Limitations
-
-- Currently only performs lexical analysis (tokenization) and syntax validation
-- No semantic analysis
 
 ## 📚 References
 
